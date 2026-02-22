@@ -1,6 +1,7 @@
-import { Dashboard } from "@/components/dashboard";
+import { VDFUrlInput } from "@/components/vdf-url-input";
 
 export default function Home() {
-  return <Dashboard />;
+  return <VDFUrlInput />;
 }
+
 

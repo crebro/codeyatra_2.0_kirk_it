@@ -1,7 +1,4 @@
-import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/lib/utils";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -11,64 +8,53 @@ export default function ProtectedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-screen flex flex-col items-center">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
-        <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
-          <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-3 items-center font-semibold">
-              <Link href="/" className="flex items-center gap-2">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="text-primary"
-                >
-                  <rect width="32" height="32" rx="8" fill="currentColor" />
-                  <text
-                    x="16"
-                    y="21"
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="12"
-                    fontWeight="bold"
-                    fontFamily="sans-serif"
-                  >
-                    VDF
-                  </text>
-                </svg>
-                <span className="text-lg">VDF</span>
+    <div className="min-h-screen flex flex-col bg-[#FFF8EA]">
+      {/* VDF-themed header with improved padding */}
+      <header className="w-full border-b border-[#9E7676]/15 bg-[#FFF8EA]/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3 md:px-14 lg:px-20">
+          <div className="flex items-center gap-10">
+            <Link href="/protected" className="font-serif text-xl font-bold text-[#594545]">
+              VDF
+            </Link>
+            {/* Navigation tabs */}
+            <nav className="hidden items-center gap-1 md:flex">
+              <Link
+                href="/protected"
+                className="rounded-md px-4 py-2 font-sans text-sm font-medium text-[#815B5B] transition-colors hover:bg-[#9E7676]/10 hover:text-[#594545]"
+              >
+                Home
               </Link>
-            </div>
-            {!hasEnvVars ? (
-              <EnvVarWarning />
-            ) : (
-              <Suspense>
-                <AuthButton />
-              </Suspense>
-            )}
+              <Link
+                href="/protected/files"
+                className="rounded-md px-4 py-2 font-sans text-sm font-medium text-[#815B5B] transition-colors hover:bg-[#9E7676]/10 hover:text-[#594545]"
+              >
+                Files
+              </Link>
+            </nav>
           </div>
-        </nav>
-        <div className="flex-1 flex flex-col gap-20 max-w-5xl p-5">
-          {children}
+          <Suspense>
+            <AuthButton />
+          </Suspense>
         </div>
+      </header>
 
-        <footer className="w-full flex items-center justify-center border-t mx-auto text-center text-xs gap-8 py-16">
-          <p>
-            Powered by{" "}
-            <a
-              href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-              target="_blank"
-              className="font-bold hover:underline"
-              rel="noreferrer"
-            >
-              Supabase
-            </a>
-          </p>
-          <ThemeSwitcher />
-        </footer>
-      </div>
-    </main>
+      {/* Main content */}
+      <main className="flex-1 flex flex-col w-full">
+        {children}
+      </main>
+
+      {/* VDF-themed footer */}
+      <footer className="w-full border-t border-[#9E7676]/15 bg-[#FFF8EA] px-6 py-8 md:px-12">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 md:flex-row">
+          <div className="flex flex-col items-center gap-1 md:items-start">
+            <span className="font-serif text-lg font-bold text-[#594545]">VDF</span>
+            <span className="font-sans text-xs text-[#9E7676]">Study what matters.</span>
+          </div>
+          <span className="font-sans text-xs text-[#9E7676]">
+            {`© ${new Date().getFullYear()} VDF`}
+          </span>
+        </div>
+      </footer>
+    </div>
   );
 }
