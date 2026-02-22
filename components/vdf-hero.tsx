@@ -35,8 +35,11 @@ export default function VDFHero() {
               Every video.
               <br />
               Every concept.
-              <br />
-              Captured.
+              <br/>
+              <ul className="text-[#000000]">
+                Captured.
+              </ul>
+              
             </h1>
 
             <p className="max-w-md font-sans text-lg leading-relaxed text-[#815B5B]">
