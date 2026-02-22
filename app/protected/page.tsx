@@ -1,7 +1,7 @@
-import { HomeContent } from "@/components/home-content";
+import { Dashboard } from "@/components/dashboard";
 
-const Home = () =>{
-  return <HomeContent />;
+export default function Home() {
+  return <Dashboard />;
 }
 
 export default Home;
