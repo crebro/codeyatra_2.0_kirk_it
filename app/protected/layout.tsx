@@ -1,4 +1,3 @@
-import { DeployButton } from "@/components/deploy-button";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { AuthButton } from "@/components/auth-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
@@ -16,11 +15,31 @@ export default function ProtectedLayout({
       <div className="flex-1 w-full flex flex-col gap-20 items-center">
         <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
           <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-            <div className="flex gap-5 items-center font-semibold">
-              <Link href={"/"}>Next.js Supabase Starter</Link>
-              <div className="flex items-center gap-2">
-                <DeployButton />
-              </div>
+            <div className="flex gap-3 items-center font-semibold">
+              <Link href="/" className="flex items-center gap-2">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 32 32"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="text-primary"
+                >
+                  <rect width="32" height="32" rx="8" fill="currentColor" />
+                  <text
+                    x="16"
+                    y="21"
+                    textAnchor="middle"
+                    fill="white"
+                    fontSize="12"
+                    fontWeight="bold"
+                    fontFamily="sans-serif"
+                  >
+                    VDF
+                  </text>
+                </svg>
+                <span className="text-lg">VDF</span>
+              </Link>
             </div>
             {!hasEnvVars ? (
               <EnvVarWarning />
