@@ -130,9 +130,17 @@ export function Dashboard() {
         setSaving(false);
         return;
       }
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("video_urls")
-        .insert({ url: youtubeUrl.trim(), user_id: user.id });
+        .insert({ url: youtubeUrl.trim(), user_id: user.id }).select().single();
+
+      const res = await fetch("/api/protected/begin_compile", {
+        method: "POST",
+        body: JSON.stringify({
+          'video_id': data.id
+        }),
+        credentials: "include", // important!
+      })
 
       if (error) {
         setSaveMessage(`Error: ${error.message}`);
@@ -176,12 +184,11 @@ export function Dashboard() {
         </div>
         {saveMessage && (
           <p
-            className={`mt-2 text-sm ${
-              saveMessage.startsWith("Error") ||
-              saveMessage.startsWith("Something")
+            className={`mt-2 text-sm ${saveMessage.startsWith("Error") ||
+                saveMessage.startsWith("Something")
                 ? "text-destructive"
                 : "text-green-600"
-            }`}
+              }`}
           >
             {saveMessage}
           </p>
@@ -253,5 +260,5 @@ export function Dashboard() {
 
     </div>
   );
- return <div> hello </div>;
+  return <div> hello </div>;
 }
