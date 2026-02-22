@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-const IMAGE_COUNT = 10;
-
-const DUMMY_IMAGES = Array.from({ length: IMAGE_COUNT }, (_, i) => ({
-  id: i,
-  src: `https://picsum.photos/seed/${i + 1}/400/300`,
-}));
+interface VideoUrl {
+  id: string;
+  user_id: string;
+  url: string;
+  video_title: string | null;
+  image_number: number | null;
+  created_at: string;
+}
 
 function isValidYoutubeUrl(url: string): boolean {
   const patterns = [
@@ -23,13 +26,84 @@ function isValidYoutubeUrl(url: string): boolean {
   return patterns.some((pattern) => pattern.test(url.trim()));
 }
 
+function extractVideoId(url: string): string {
+  const patterns = [
+    /[?&]v=([\w-]{11})/,
+    /\/embed\/([\w-]{11})/,
+    /\/shorts\/([\w-]{11})/,
+    /youtu\.be\/([\w-]{11})/,
+    /\/live\/([\w-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return "";
+}
+
 export function HomeContent() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [images, setImages] = useState(DUMMY_IMAGES);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
+  const router = useRouter();
+
+  // Video list state
+  const [videos, setVideos] = useState<VideoUrl[]>([]);
+  const [loadingVideos, setLoadingVideos] = useState(true);
+  const [frameCounts, setFrameCounts] = useState<Record<string, number>>({});
+
+  // Fetch user's videos on mount
+  const fetchVideos = useCallback(async () => {
+    setLoadingVideos(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setLoadingVideos(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("video_urls")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
+        setVideos(data as VideoUrl[]);
+
+        // Fetch frame counts for each video from video_frames
+        const videoIds = (data as VideoUrl[]).map((v) => v.id);
+        if (videoIds.length > 0) {
+          const { data: framesData } = await supabase
+            .from("video_frames")
+            .select("video_id")
+            .in("video_id", videoIds);
+
+          if (framesData) {
+            const counts: Record<string, number> = {};
+            for (const row of framesData) {
+              counts[row.video_id] = (counts[row.video_id] || 0) + 1;
+            }
+            setFrameCounts(counts);
+          }
+        }
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingVideos(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
+
+  // Save URL handler
   const handleSaveUrl = async () => {
     if (!youtubeUrl.trim()) {
       setSaveMessage("Please enter a YouTube URL.");
@@ -37,7 +111,9 @@ export function HomeContent() {
     }
 
     if (!isValidYoutubeUrl(youtubeUrl)) {
-      setSaveMessage("Error: Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=...)");
+      setSaveMessage(
+        "Error: Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=...)"
+      );
       return;
     }
 
@@ -46,7 +122,9 @@ export function HomeContent() {
 
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setSaveMessage("Error: You must be signed in to save a URL.");
         setSaving(false);
@@ -61,61 +139,23 @@ export function HomeContent() {
       } else {
         setSaveMessage("URL saved successfully!");
         setYoutubeUrl("");
+        // Refresh the video list
+        fetchVideos();
       }
-    } catch (err) {
+    } catch {
       setSaveMessage("Something went wrong. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDeleteImage = (id: number) => {
-    setImages((prev) => prev.filter((img) => img.id !== id));
-  };
-
-  const handleSaveAsPdf = async () => {
-    const container = scrollRef.current;
-    if (!container || images.length === 0) return;
-
-    // Create a simple printable view and use browser print to PDF
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-
-    const imagesHtml = images
-      .map(
-        (img) =>
-          `<div style="page-break-inside: avoid; margin-bottom: 20px; text-align: center;">
-            <img src="${img.src}" style="max-width: 100%; height: auto; border-radius: 8px;" crossorigin="anonymous" />
-            <p style="margin-top: 8px; color: #666; font-size: 14px;">Image ${img.id + 1}</p>
-          </div>`
-      )
-      .join("");
-
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>VDF - Images Export</title>
-          <style>
-            body { font-family: sans-serif; padding: 40px; }
-            h1 { text-align: center; margin-bottom: 30px; }
-          </style>
-        </head>
-        <body>
-          <h1>VDF - Exported Images</h1>
-          ${imagesHtml}
-          <script>
-            window.onload = function() {
-              setTimeout(function() { window.print(); window.close(); }, 1000);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+  // Navigate to preview page
+  const handleSelectVideo = (video: VideoUrl) => {
+    router.push(`/protected/preview/${video.id}`);
   };
 
   return (
-    <div className="flex-1 flex flex-col gap-10 max-w-5xl w-full p-5">
+    <div className="flex-1 flex flex-col gap-8 max-w-5xl w-full p-5">
       {/* YouTube URL Section */}
       <section className="w-full">
         <h2 className="font-semibold text-xl mb-4">Paste YouTube URL</h2>
@@ -125,6 +165,9 @@ export function HomeContent() {
             placeholder="https://www.youtube.com/watch?v=..."
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSaveUrl();
+            }}
             className="flex-1"
           />
           <Button onClick={handleSaveUrl} disabled={saving}>
@@ -134,7 +177,8 @@ export function HomeContent() {
         {saveMessage && (
           <p
             className={`mt-2 text-sm ${
-              saveMessage.startsWith("Error") || saveMessage.startsWith("Something")
+              saveMessage.startsWith("Error") ||
+              saveMessage.startsWith("Something")
                 ? "text-destructive"
                 : "text-green-600"
             }`}
@@ -144,78 +188,69 @@ export function HomeContent() {
         )}
       </section>
 
-      {/* PDF Preview Style Images Section */}
+      {/* Video List Section */}
       <section className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-xl">
-            Pages ({images.length})
-          </h2>
-          {images.length > 0 && (
-            <Button onClick={handleSaveAsPdf} variant="outline">
-              📄 Save as PDF
-            </Button>
-          )}
-        </div>
+        <h2 className="font-semibold text-xl mb-4">
+          Your Videos ({videos.length})
+        </h2>
 
-        {images.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No pages to display.</p>
+        {loadingVideos ? (
+          <p className="text-muted-foreground text-sm">Loading videos...</p>
+        ) : videos.length === 0 ? (
+          <p className="text-muted-foreground text-sm">
+            No videos yet. Paste a YouTube URL above to get started.
+          </p>
         ) : (
-          <div
-            ref={scrollRef}
-            className="rounded-lg overflow-hidden border border-border"
-          >
-            {/* Dark background like PDF preview */}
-            <div
-              className="flex flex-col items-center gap-6 py-6 px-4 max-h-[70vh] overflow-y-auto"
-              style={{
-                backgroundColor: "#525659",
-                scrollbarColor: "#888 #525659",
-              }}
-            >
-              {images.map((img, index) => (
-                <div
-                  key={img.id}
-                  className="relative group"
-                  style={{ width: "100%", maxWidth: 540 }}
+          <div className="flex flex-col gap-2">
+            {videos.map((video) => {
+              const videoId = extractVideoId(video.url);
+              const thumbnailUrl = videoId
+                ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+                : "";
+              const title = video.video_title || videoId || "Untitled Video";
+
+              return (
+                <button
+                  key={video.id}
+                  onClick={() => handleSelectVideo(video)}
+                  className="flex items-center gap-4 w-full text-left p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                 >
-                  {/* Paper page */}
-                  <div
-                    className="bg-white rounded-sm overflow-hidden"
-                    style={{
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
-                      aspectRatio: "8.5 / 11",
-                    }}
-                  >
-                    {/* Image fills the page */}
+                  {/* Thumbnail */}
+                  {thumbnailUrl && (
                     <img
-                      src={img.src}
-                      alt={`Page ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      src={thumbnailUrl}
+                      alt={title}
+                      className="w-28 h-16 object-cover rounded-md flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
                     />
+                  )}
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">
+                      🎬 {title}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">
+                      {video.url}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(video.created_at).toLocaleDateString()}{" "}
+                      {frameCounts[video.id] !== undefined &&
+                        `· ${frameCounts[video.id]} frame${frameCounts[video.id] !== 1 ? "s" : ""}`}
+                    </p>
                   </div>
-
-                  {/* Delete button — appears on hover */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDeleteImage(img.id)}
-                      className="h-7 px-2 text-xs shadow-lg"
-                    >
-                      ✕ Delete
-                    </Button>
-                  </div>
-
-                  {/* Page number below */}
-                  <p className="text-center text-xs mt-2" style={{ color: "#aaa" }}>
-                    Page {index + 1} of {images.length}
-                  </p>
-                </div>
-              ))}
-            </div>
+                  {/* Arrow */}
+                  <span className="text-muted-foreground text-lg flex-shrink-0">
+                    ›
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </section>
+
     </div>
   );
 }
