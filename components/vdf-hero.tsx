@@ -32,14 +32,10 @@ export default function VDFHero() {
             </p>
 
             <h1 className="font-serif text-5xl font-bold leading-[1.1] text-[#594545] md:text-6xl lg:text-7xl" style={{ textWrap: "balance" }}>
-              Every video.
+              Study Different.
               <br />
-              Every concept.
+              Study <span className="text-black"> Better. </span>
               <br/>
-              <ul className="text-[#000000]">
-                Captured.
-              </ul>
-              
             </h1>
 
             <p className="max-w-md font-sans text-lg leading-relaxed text-[#815B5B]">
