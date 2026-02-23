@@ -14,7 +14,7 @@ const steps = [
   {
     number: "3",
     icon: BookOpen,
-    label: "Study the frames",
+    label: "You Study the Frames",
     locked: true,
   },
 ]
@@ -30,7 +30,7 @@ export default function VDFHowItWorks() {
 
           <div className="flex w-full flex-col items-center gap-8 md:flex-row md:gap-0">
             {steps.map((step, i) => (
-              <div key={step.number} className="flex flex-1 flex-col items-center gap-0 md:flex-row md:gap-0 w-full">
+              <div key={step.number} className="flex flex-1 w-full flex-col items-center gap-0 md:flex-row md:gap-0 align-center justify-center">
                 <div className="flex flex-col items-center gap-4 text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#594545]">
                     <span className="font-sans text-sm font-semibold text-[#FFF8EA]">
@@ -49,16 +49,6 @@ export default function VDFHowItWorks() {
                     )}
                   </div>
                 </div>
-
-                {/* Dashed connector line */}
-                {i < steps.length - 1 && (
-                  <>
-                    <div className="hidden flex-1 md:block">
-                      <div className="mx-6 h-px border-t-2 border-dashed border-[#9E7676]/30" />
-                    </div>
-                    <div className="h-8 w-px border-l-2 border-dashed border-[#9E7676]/30 md:hidden" />
-                  </>
-                )}
               </div>
             ))}
           </div>

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-
+import { jsPDF } from "jspdf";
 interface VideoUrl {
   id: string;
   user_id: string;
@@ -18,26 +18,7 @@ interface FrameImage {
   id: string;
   video_id: string;
   url: string;
-}
-
-/* Mock descriptions — one per slide, cycling */
-const MOCK_DESCRIPTIONS = [
-  "This slide introduces the main topic and sets the context for the discussion. The speaker outlines the key goals and what the audience can expect to learn.",
-  "A detailed breakdown of the core concepts is presented here, with visual aids to support the explanation. Key terminology is defined for clarity.",
-  "The speaker transitions to a real-world example, demonstrating how the theory applies in practice. Supporting data points are highlighted.",
-  "This section covers the methodology and approach used. Step-by-step instructions are provided for reproducibility.",
-  "A comparative analysis is shown, contrasting different approaches and their trade-offs. The speaker emphasizes the recommended path.",
-  "Visual data — charts or diagrams — illustrate trends and patterns. The speaker walks through the most significant data points.",
-  "The speaker addresses common misconceptions and frequently asked questions. Clarifications are given with concrete examples.",
-  "An interactive segment where the audience or viewers are encouraged to reflect on the material presented so far.",
-  "Advanced concepts and edge cases are discussed. The speaker shares tips from personal experience in the field.",
-  "A summary of all key takeaways is presented. Action items and next steps are listed for the audience to follow up on.",
-  "The speaker shares supplementary resources, links, and references for deeper exploration of the topic.",
-  "A brief Q&A-style recap where the most important points are revisited in a concise question-and-answer format.",
-];
-
-function getSlideDescription(index: number): string {
-  return MOCK_DESCRIPTIONS[index % MOCK_DESCRIPTIONS.length];
+  captions: string;
 }
 
 export default function PreviewPage() {
@@ -72,7 +53,8 @@ export default function PreviewPage() {
         .from("video_frames")
         .select("*")
         .eq("video_id", videoId)
-        .order("id", { ascending: true });
+        .order("ts", { ascending: true })
+        .order("created_at", { ascending: true });
 
       if (!framesError && framesData) {
         setFrames(framesData as FrameImage[]);
@@ -106,29 +88,43 @@ export default function PreviewPage() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [frames.length]);
 
-  const handleSaveAsPdf = () => {
-    if (frames.length === 0) return;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    const t = video?.video_title || "Video Frames";
-    const imagesHtml = frames
-      .map(
-        (frame, index) =>
-          `<div style="page-break-inside: avoid; margin-bottom: 20px; text-align: center;">
-            <img src="${frame.url}" style="max-width: 100%; height: auto; border-radius: 8px;" crossorigin="anonymous" />
-            <p style="margin-top: 8px; color: #666; font-size: 14px;">Page ${index + 1}</p>
-          </div>`
-      )
-      .join("");
-    printWindow.document.write(`<html><head><title>VDF - ${t}</title><style>body{font-family:sans-serif;padding:40px}h1{text-align:center;margin-bottom:30px}</style></head><body><h1>VDF - ${t}</h1>${imagesHtml}<script>window.onload=function(){setTimeout(function(){window.print();window.close()},1000)}</script></body></html>`);
-    printWindow.document.close();
-  };
 
-  /* Stable descriptions per frame */
-  const descriptions = useMemo(
-    () => frames.map((_, i) => getSlideDescription(i)),
-    [frames]
-  );
+  const handleSaveAsPdf = async () => {
+    if (frames.length === 0) return;
+
+    let pdf: jsPDF | null = null;
+
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}`;
+
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+
+      if (i === 0) {
+        // Create first page using image dimensions
+        pdf = new jsPDF({
+          orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+          unit: "px",
+          format: [imgWidth, imgHeight],
+        });
+      } else {
+        // Add page with exact image dimensions
+        pdf!.addPage([imgWidth, imgHeight], imgWidth > imgHeight ? "landscape" : "portrait");
+      }
+
+      pdf!.addImage(img, "JPEG", 0, 0, imgWidth, imgHeight);
+    }
+
+    pdf!.save("frames.pdf");
+  };
 
   if (loading) {
     return (
@@ -210,7 +206,7 @@ export default function PreviewPage() {
                   <div className="flex-1 overflow-hidden rounded-sm border border-[#9E7676]/20 bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={f.url}
+                      src={`${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${f.url}`}
                       alt={`Slide ${i + 1}`}
                       className="w-full aspect-video object-cover"
                     />
@@ -229,7 +225,7 @@ export default function PreviewPage() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={frames[currentIndex].url}
+                  src={`${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frames[currentIndex].url}`}
                   alt={`Slide ${currentIndex + 1}`}
                   className="w-full h-full object-contain bg-black"
                 />
@@ -273,7 +269,7 @@ export default function PreviewPage() {
 
             <div className="px-4 py-4">
               <p className="font-sans text-sm leading-relaxed text-[#594545]">
-                {descriptions[currentIndex]}
+                {frames[currentIndex].captions}
               </p>
             </div>
 
@@ -284,7 +280,7 @@ export default function PreviewPage() {
                 All slides
               </p>
               <div className="flex flex-col gap-1">
-                {frames.map((_, i) => (
+                {frames.map((f, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentIndex(i)}
@@ -295,7 +291,7 @@ export default function PreviewPage() {
                     }`}
                   >
                     <span className="font-medium">Slide {i + 1}:</span>{" "}
-                    {descriptions[i].slice(0, 60)}...
+                    {f.captions.slice(0, 60)}...
                   </button>
                 ))}
               </div>

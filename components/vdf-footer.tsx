@@ -7,21 +7,6 @@ export default function VDFFooter() {
           <span className="font-sans text-xs text-[#9E7676]">Study what matters.</span>
         </div>
 
-        <nav className="flex items-center gap-6">
-          <a href="#get-started" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
-            Get Started
-          </a>
-          <a href="#pricing" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
-            Pricing
-          </a>
-          <a href="#" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
-            Terms
-          </a>
-          <a href="#" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
-            Privacy
-          </a>
-        </nav>
-
         <span className="font-sans text-xs text-[#9E7676]">
           {`© ${new Date().getFullYear()} VDF`}
         </span>
