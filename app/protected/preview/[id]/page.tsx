@@ -240,23 +240,15 @@ export default function PreviewPage() {
                     </div>
                   </div>
                 </button>
-                <button
-                  onClick={() => handleDeleteFrame(f.id)}
-                  disabled={deletingFrameId === f.id}
-                  className="absolute top-1 right-1 bg-red-600/90 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold disabled:opacity-50"
-                  title="Delete this frame"
-                >
-                  {deletingFrameId === f.id ? "..." : "✕"}
-                </button>
               </div>
             ))}
           </div>
 
           {/* Center: Main slide viewer */}
           <div className="flex-1 flex flex-col bg-[#594545]/90 min-w-0">
-            <div className="flex-1 flex items-center justify-center p-6">
+            <div className="flex-1 flex items-center justify-center p-6 relative group">
               <div
-                className="bg-white rounded shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-hidden relative group"
+                className="bg-white rounded shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-hidden"
                 style={{ maxWidth: "100%", maxHeight: "100%", aspectRatio: "16 / 9", width: "100%" }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -276,7 +268,22 @@ export default function PreviewPage() {
                     }
                   }}
                 />
-                <button
+                {/* <button
+                  onClick={() => handleDeleteFrame(frames[currentIndex].id)}
+                  disabled={deletingFrameId === frames[currentIndex].id}
+                  className="absolute top-3 right-3 bg-red-600/90 hover:bg-red-700 text-white rounded-md px-3 py-1.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium disabled:opacity-50 shadow-lg"
+                  title="Delete this frame"
+                >
+                  {deletingFrameId === frames[currentIndex].id ? "Deleting..." : (
+                    <>
+                      <span>✕</span>
+                      <span>Delete Frame</span>
+                    </>
+                  )}
+                </button> */}
+              </div>
+
+<button
                   onClick={() => handleDeleteFrame(frames[currentIndex].id)}
                   disabled={deletingFrameId === frames[currentIndex].id}
                   className="absolute top-3 right-3 bg-red-600/90 hover:bg-red-700 text-white rounded-md px-3 py-1.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium disabled:opacity-50 shadow-lg"
@@ -289,7 +296,6 @@ export default function PreviewPage() {
                     </>
                   )}
                 </button>
-              </div>
             </div>
             {/* Slide counter + nav */}
             <div className="flex items-center justify-center gap-3 pb-3">
