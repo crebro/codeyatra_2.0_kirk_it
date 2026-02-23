@@ -17,7 +17,6 @@ function isValidYoutubeUrl(url: string): boolean {
 
 export function VDFUrlInput() {
   const [youtubeUrl, setYoutubeUrl] = useState("");
-  const [slideTitle, setSlideTitle] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const router = useRouter();
@@ -53,7 +52,6 @@ export function VDFUrlInput() {
         .insert({ 
           url: youtubeUrl.trim(), 
           user_id: user.id,
-          video_title: slideTitle.trim() || null
         }).select().single();
 
       const res = await fetch("/api/protected/begin_compile", {
@@ -69,7 +67,6 @@ export function VDFUrlInput() {
       } else {
         setSaveMessage("URL saved successfully!");
         setYoutubeUrl("");
-        setSlideTitle("");
         // Navigate to files page after successful save
         setTimeout(() => router.push("/protected/files"), 1200);
       }
@@ -95,13 +92,6 @@ export function VDFUrlInput() {
           </div>
 
           <div className="w-full flex flex-col gap-4">
-            <input
-              type="text"
-              value={slideTitle}
-              onChange={(e) => setSlideTitle(e.target.value)}
-              placeholder="Slide title (optional)"
-              className="w-full rounded-lg border-[1.5px] border-[#594545] bg-[#FFF8EA] px-5 py-4 font-sans text-base text-[#594545] placeholder:text-[#9E7676]/60 transition-colors focus:border-[#815B5B] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
-            />
             <input
               type="url"
               value={youtubeUrl}
