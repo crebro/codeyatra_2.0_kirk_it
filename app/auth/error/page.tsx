@@ -32,8 +32,8 @@ export default function Page({
     <div className="flex min-h-svh w-full flex-col bg-[#FFF8EA]">
       <header className="w-full border-b border-[#9E7676]/15 bg-[#FFF8EA]/90 backdrop-blur-md px-6 py-4">
         <div className="mx-auto max-w-7xl">
-          <Link href="/" className="font-serif text-xl font-bold text-[#594545]">
-            VDF
+          <Link href="/">
+            <img src="https://i.imgur.com/3HcwFNF.png" alt="Logo" className="h-8" />
           </Link>
         </div>
       </header>
