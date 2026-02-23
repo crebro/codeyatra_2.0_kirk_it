@@ -13,8 +13,8 @@ export default function ProtectedLayout({
       <header className="w-full border-b border-[#9E7676]/15 bg-[#FFF8EA]/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3 md:px-14 lg:px-20">
           <div className="flex items-center gap-10">
-            <Link href="/protected" className="font-serif text-xl font-bold text-[#594545]">
-              VDF
+            <Link href="/protected">
+              <img src="https://i.imgur.com/3HcwFNF.png" alt="Logo" className="h-8" />
             </Link>
             {/* Navigation tabs */}
             <nav className="hidden items-center gap-1 md:flex">
@@ -47,7 +47,7 @@ export default function ProtectedLayout({
       <footer className="w-full border-t border-[#9E7676]/15 bg-[#FFF8EA] px-6 py-8 md:px-12">
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 md:flex-row">
           <div className="flex flex-col items-center gap-1 md:items-start">
-            <span className="font-serif text-lg font-bold text-[#594545]">VDF</span>
+            <img src="https://i.imgur.com/3HcwFNF.png" alt="Logo" className="h-8" />
             <span className="font-sans text-xs text-[#9E7676]">Study what matters.</span>
           </div>
           <span className="font-sans text-xs text-[#9E7676]">

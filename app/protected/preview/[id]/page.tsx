@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-
+import { jsPDF } from "jspdf";
 interface VideoUrl {
   id: string;
   user_id: string;
@@ -18,7 +18,7 @@ interface FrameImage {
   id: string;
   video_id: string;
   url: string;
-  caption: string | null;
+  captions: string;
 }
 
 export default function PreviewPage() {
@@ -56,7 +56,8 @@ export default function PreviewPage() {
         .from("video_frames")
         .select("*")
         .eq("video_id", videoId)
-        .order("id", { ascending: true });
+        .order("ts", { ascending: true })
+        .order("created_at", { ascending: true });
 
       if (!framesError && framesData) {
         console.log("[Preview] Fetched frames:", framesData);
@@ -109,22 +110,41 @@ export default function PreviewPage() {
     }
   };
 
-  const handleSaveAsPdf = () => {
+  const handleSaveAsPdf = async () => {
     if (frames.length === 0) return;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    const t = video?.video_title || "Video Frames";
-    const imagesHtml = frames
-      .map(
-        (frame, index) =>
-          `<div style="page-break-inside: avoid; margin-bottom: 20px; text-align: center;">
-            <img src="${frame.url}" style="max-width: 100%; height: auto; border-radius: 8px;" crossorigin="anonymous" />
-            <p style="margin-top: 8px; color: #666; font-size: 14px;">Page ${index + 1}</p>
-          </div>`
-      )
-      .join("");
-    printWindow.document.write(`<html><head><title>VDF - ${t}</title><style>body{font-family:sans-serif;padding:40px}h1{text-align:center;margin-bottom:30px}</style></head><body><h1>VDF - ${t}</h1>${imagesHtml}<script>window.onload=function(){setTimeout(function(){window.print();window.close()},1000)}</script></body></html>`);
-    printWindow.document.close();
+
+    let pdf: jsPDF | null = null;
+
+    for (let i = 0; i < frames.length; i++) {
+      const frame = frames[i];
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}`;
+
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
+
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+
+      if (i === 0) {
+        // Create first page using image dimensions
+        pdf = new jsPDF({
+          orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+          unit: "px",
+          format: [imgWidth, imgHeight],
+        });
+      } else {
+        // Add page with exact image dimensions
+        pdf!.addPage([imgWidth, imgHeight], imgWidth > imgHeight ? "landscape" : "portrait");
+      }
+
+      pdf!.addImage(img, "JPEG", 0, 0, imgWidth, imgHeight);
+    }
+
+    pdf!.save("frames.pdf");
   };
 
   if (loading) {
@@ -241,7 +261,7 @@ export default function PreviewPage() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={frames[currentIndex].url.startsWith("http") ? frames[currentIndex].url : `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frames[currentIndex].url}`}
+                  src={`${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frames[currentIndex].url}`}
                   alt={`Slide ${currentIndex + 1}`}
                   className="w-full h-full object-contain bg-neutral-900"
                   onError={(e) => {
@@ -309,7 +329,7 @@ export default function PreviewPage() {
 
             <div className="px-4 py-4">
               <p className="font-sans text-sm leading-relaxed text-[#594545]">
-                {frames[currentIndex].caption || "No caption available"}
+                {frames[currentIndex].captions}
               </p>
             </div>
 
@@ -320,7 +340,7 @@ export default function PreviewPage() {
                 All slides
               </p>
               <div className="flex flex-col gap-1">
-                {frames.map((frame, i) => (
+                {frames.map((f, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentIndex(i)}
@@ -331,7 +351,7 @@ export default function PreviewPage() {
                     }`}
                   >
                     <span className="font-medium">Slide {i + 1}:</span>{" "}
-                    {frame.caption ? frame.caption.slice(0, 60) + (frame.caption.length > 60 ? "..." : "") : "No caption"}
+                    {f.captions.slice(0, 60)}...
                   </button>
                 ))}
               </div>
