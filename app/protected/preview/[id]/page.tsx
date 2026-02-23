@@ -21,26 +21,6 @@ interface FrameImage {
   captions: string;
 }
 
-/* Mock descriptions — one per slide, cycling */
-const MOCK_DESCRIPTIONS = [
-  "This slide introduces the main topic and sets the context for the discussion. The speaker outlines the key goals and what the audience can expect to learn.",
-  "A detailed breakdown of the core concepts is presented here, with visual aids to support the explanation. Key terminology is defined for clarity.",
-  "The speaker transitions to a real-world example, demonstrating how the theory applies in practice. Supporting data points are highlighted.",
-  "This section covers the methodology and approach used. Step-by-step instructions are provided for reproducibility.",
-  "A comparative analysis is shown, contrasting different approaches and their trade-offs. The speaker emphasizes the recommended path.",
-  "Visual data — charts or diagrams — illustrate trends and patterns. The speaker walks through the most significant data points.",
-  "The speaker addresses common misconceptions and frequently asked questions. Clarifications are given with concrete examples.",
-  "An interactive segment where the audience or viewers are encouraged to reflect on the material presented so far.",
-  "Advanced concepts and edge cases are discussed. The speaker shares tips from personal experience in the field.",
-  "A summary of all key takeaways is presented. Action items and next steps are listed for the audience to follow up on.",
-  "The speaker shares supplementary resources, links, and references for deeper exploration of the topic.",
-  "A brief Q&A-style recap where the most important points are revisited in a concise question-and-answer format.",
-];
-
-function getSlideDescription(index: number): string {
-  return MOCK_DESCRIPTIONS[index % MOCK_DESCRIPTIONS.length];
-}
-
 export default function PreviewPage() {
   const params = useParams();
   const router = useRouter();
@@ -145,12 +125,6 @@ export default function PreviewPage() {
 
     pdf!.save("frames.pdf");
   };
-
-  /* Stable descriptions per frame */
-  const descriptions = useMemo(
-    () => frames.map((_, i) => getSlideDescription(i)),
-    [frames]
-  );
 
   if (loading) {
     return (
