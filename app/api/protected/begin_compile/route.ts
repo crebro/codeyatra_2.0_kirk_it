@@ -15,10 +15,10 @@ export async function POST(
   }
 
   // parse body
-  let body: any
+  let body: Record<string, unknown>
   try {
     body = await request.json()
-  } catch (err) {
+  } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,
       headers: { 'content-type': 'application/json' },
@@ -88,10 +88,12 @@ export async function POST(
         status: 200,
         headers: { 'content-type': 'application/json' },
       })
-    } catch (err: any) {
-      return new Response(JSON.stringify({ error: err?.message ?? String(err) }), { status: 502, headers: { 'content-type': 'application/json' } })
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return new Response(JSON.stringify({ error: message }), { status: 502, headers: { 'content-type': 'application/json' } })
     }
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err?.message ?? String(err) }), { status: 500, headers: { 'content-type': 'application/json' } })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: message }), { status: 500, headers: { 'content-type': 'application/json' } })
   }
 }

@@ -11,10 +11,11 @@ export async function POST(request: Request) {
         })
     }
 
-    let body: any
+    let body: Record<string, unknown>
     try {
         body = await request.json()
-    } catch (err) {
+    } catch {
+
         return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
             status: 400,
             headers: { 'content-type': 'application/json' },

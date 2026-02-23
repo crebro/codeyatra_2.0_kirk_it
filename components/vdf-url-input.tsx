@@ -54,7 +54,7 @@ export function VDFUrlInput() {
           user_id: user.id,
         }).select().single();
 
-      const res = await fetch("/api/protected/begin_compile", {
+      await fetch("/api/protected/begin_compile", {
         method: "POST",
         body: JSON.stringify({
           'video_id': data.id

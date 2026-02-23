@@ -13,6 +13,17 @@ interface VideoUrl {
   created_at: string;
 }
 
+function isValidYoutubeUrl(url: string): boolean {
+  const patterns = [
+    /^(https?:\/\/)?(www\.)?youtube\.com\/watch\?.*v=([\w-]{11})/,
+    /^(https?:\/\/)?(www\.)?youtube\.com\/embed\/([\w-]{11})/,
+    /^(https?:\/\/)?(www\.)?youtube\.com\/shorts\/([\w-]{11})/,
+    /^(https?:\/\/)?youtu\.be\/([\w-]{11})/,
+    /^(https?:\/\/)?(www\.)?youtube\.com\/live\/([\w-]{11})/,
+  ];
+  return patterns.some((pattern) => pattern.test(url.trim()));
+}
+
 function extractVideoId(url: string): string {
   const patterns = [
     /[?&]v=([\w-]{11})/,
@@ -28,15 +39,19 @@ function extractVideoId(url: string): string {
   return "";
 }
 
-export function VDFVideoFiles() {
+export function Dashboard() {
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
+
   const router = useRouter();
+
+  // Video list state
   const [videos, setVideos] = useState<VideoUrl[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [frameCounts, setFrameCounts] = useState<Record<string, number>>({});
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [renameSaving, setRenameSaving] = useState(false);
 
+  // Fetch user's videos on mount
   const fetchVideos = useCallback(async () => {
     setLoadingVideos(true);
     try {
@@ -58,6 +73,7 @@ export function VDFVideoFiles() {
       if (!error && data) {
         setVideos(data as VideoUrl[]);
 
+        // Fetch frame counts for each video from video_frames
         const videoIds = (data as VideoUrl[]).map((v) => v.id);
         if (videoIds.length > 0) {
           const { data: framesData } = await supabase
@@ -85,65 +101,147 @@ export function VDFVideoFiles() {
     fetchVideos();
   }, [fetchVideos]);
 
+  // Save URL handler
+  const handleSaveUrl = async () => {
+    if (!youtubeUrl.trim()) {
+      setSaveMessage("Please enter a YouTube URL.");
+      return;
+    }
+
+    if (!isValidYoutubeUrl(youtubeUrl)) {
+      setSaveMessage(
+        "Error: Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=...)"
+      );
+      return;
+    }
+
+    setSaving(true);
+    setSaveMessage("");
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setSaveMessage("Error: You must be signed in to save a URL.");
+        setSaving(false);
+        return;
+      }
+
+      // 1. Insert into Supabase
+      const { data, error: insertError } = await supabase
+        .from("video_urls")
+        .insert({ url: youtubeUrl.trim(), user_id: user.id })
+        .select()
+        .single();
+
+      if (insertError) {
+        setSaveMessage(`Error saving to database: ${insertError.message}`);
+        setSaving(false);
+        return;
+      }
+
+      if (!data) {
+        setSaveMessage("Error: Failed to retrieve saved video data.");
+        setSaving(false);
+        return;
+      }
+
+      // 2. Call the compile API
+      try {
+        const res = await fetch("/api/protected/begin_compile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            video_id: data.id,
+          }),
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          setSaveMessage(`URL saved, but compile trigger failed: ${errorData.error || res.statusText}`);
+        } else {
+          setSaveMessage("URL saved and compilation started!");
+          setYoutubeUrl("");
+          fetchVideos();
+        }
+      } catch (fetchErr: unknown) {
+        const msg = fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+        setSaveMessage(`URL saved, but failed to connect to compile service: ${msg}`);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSaveMessage(`Something went wrong: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Navigate to preview page
   const handleSelectVideo = (video: VideoUrl) => {
     router.push(`/protected/preview/${video.id}`);
   };
 
-  const startRename = (video: VideoUrl, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setRenamingId(video.id);
-    setRenameValue(video.video_title || "");
-  };
-
-  const saveRename = async (videoId: string, e: React.MouseEvent | React.KeyboardEvent) => {
-    e.stopPropagation();
-    setRenameSaving(true);
-    try {
-      const supabase = createClient();
-      await supabase
-        .from("video_urls")
-        .update({ video_title: renameValue.trim() || null })
-        .eq("id", videoId);
-      setVideos((prev) =>
-        prev.map((v) => (v.id === videoId ? { ...v, video_title: renameValue.trim() || null } : v))
-      );
-      setRenamingId(null);
-    } catch {
-      // silently fail
-    } finally {
-      setRenameSaving(false);
-    }
-  };
-
-  const cancelRename = (e: React.MouseEvent | React.KeyboardEvent) => {
-    e.stopPropagation();
-    setRenamingId(null);
-    setRenameValue("");
-  };
-
-  const handleDelete = async (videoId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm("Are you sure you want to delete this slide and all its frames?")) return;
-    try {
-      const supabase = createClient();
-      await supabase.from("video_frames").delete().eq("video_id", videoId);
-      await supabase.from("video_urls").delete().eq("id", videoId);
-      setVideos((prev) => prev.filter((v) => v.id !== videoId));
-    } catch {
-      // silently fail
-    }
-  };
-
   return (
     <div className="w-full">
+      {/* URL Input Section */}
+      <section className="grain-overlay relative w-full bg-[#FFF0D6] px-6 py-20 md:px-12 md:py-28">
+        <div className="relative z-10 mx-auto max-w-xl flex flex-col items-center gap-6">
+          <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-[#9E7676]">
+            Paste your link
+          </p>
+
+          <div className="w-full flex flex-col gap-4">
+            <input
+              type="url"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveUrl();
+              }}
+              placeholder="youtube.com/watch?v=..."
+              className="w-full rounded-lg border-[1.5px] border-[#594545] bg-[#FFF8EA] px-5 py-4 font-sans text-base text-[#594545] placeholder:text-[#9E7676]/60 transition-colors focus:border-[#815B5B] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
+            />
+            <button
+              onClick={handleSaveUrl}
+              disabled={saving}
+              className="w-full rounded-full bg-[#815B5B] px-8 py-4 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#815B5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF0D6] disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Extract Frames"}
+            </button>
+          </div>
+
+          {saveMessage && (
+            <p
+              className={`font-sans text-sm ${saveMessage.startsWith("Error") ||
+                saveMessage.startsWith("Something")
+                ? "text-red-600"
+                : "text-emerald-700"
+                }`}
+            >
+              {saveMessage}
+            </p>
+          )}
+
+          <p className="font-sans text-xs text-[#9E7676]">
+            Works with any public YouTube video.
+          </p>
+        </div>
+      </section>
+
+      {/* Video List Section */}
       <section className="grain-overlay relative w-full px-6 py-16 md:px-12 md:py-24">
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="mb-10 flex items-center justify-between">
             <h2 className="font-serif text-2xl font-bold text-[#594545] md:text-3xl">
-              Your Slides
+              Your Videos
             </h2>
             <span className="rounded-full bg-[#594545] px-3 py-1 font-sans text-xs font-medium text-[#FFF8EA]">
-              {videos.length} slide{videos.length !== 1 ? "s" : ""}
+              {videos.length} video{videos.length !== 1 ? "s" : ""}
             </span>
           </div>
 
@@ -168,11 +266,7 @@ export function VDFVideoFiles() {
                 </svg>
               </div>
               <p className="font-sans text-sm text-[#9E7676]">
-                No videos yet. Paste a YouTube URL on the{" "}
-                <a href="/protected" className="underline text-[#815B5B] hover:text-[#594545]">
-                  Home
-                </a>{" "}
-                page to get started.
+                No videos yet. Paste a YouTube URL above to get started.
               </p>
             </div>
           ) : (
@@ -185,10 +279,10 @@ export function VDFVideoFiles() {
                 const title = video.video_title || videoId || "Untitled Video";
 
                 return (
-                  <div
+                  <button
                     key={video.id}
                     onClick={() => handleSelectVideo(video)}
-                    className="cursor-pointer group overflow-hidden rounded-lg bg-[#FFF8EA] text-left shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
+                    className="group overflow-hidden rounded-lg bg-[#FFF8EA] text-left shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
                   >
                     {/* Thumbnail */}
                     <div className="relative">
@@ -218,61 +312,9 @@ export function VDFVideoFiles() {
 
                     {/* Content */}
                     <div className="p-4">
-                      {renamingId === video.id ? (
-                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="text"
-                            value={renameValue}
-                            onChange={(e) => setRenameValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") saveRename(video.id, e);
-                              if (e.key === "Escape") cancelRename(e);
-                            }}
-                            className="flex-1 rounded border border-[#815B5B] bg-[#FFF8EA] px-2 py-1 font-sans text-sm text-[#594545] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
-                            autoFocus
-                          />
-                          <button
-                            onClick={(e) => saveRename(video.id, e)}
-                            disabled={renameSaving}
-                            className="rounded bg-[#815B5B] px-2 py-1 font-sans text-xs text-[#FFF8EA] hover:bg-[#594545] disabled:opacity-50"
-                          >
-                            {renameSaving ? "..." : "✓"}
-                          </button>
-                          <button
-                            onClick={cancelRename}
-                            className="rounded bg-[#9E7676] px-2 py-1 font-sans text-xs text-[#FFF8EA] hover:bg-[#815B5B]"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-sans text-sm font-medium text-[#594545] truncate group-hover:text-[#815B5B] transition-colors flex-1">
-                            {title}
-                          </p>
-                          <div className="flex items-center gap-1 shrink-0">
-                            <button
-                              onClick={(e) => startRename(video, e)}
-                              className="rounded p-1 text-[#815B5B] hover:bg-[#815B5B]/10 transition-colors"
-                              title="Rename slide"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                                </svg>
-                            </button>
-                            <button
-                              onClick={(e) => handleDelete(video.id, e)}
-                              className="rounded p-1 text-red-600 hover:bg-red-50 transition-colors"
-                              title="Delete slide"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                </svg>
-
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      <p className="font-sans text-sm font-medium text-[#594545] truncate group-hover:text-[#815B5B] transition-colors">
+                        {title}
+                      </p>
                       <p className="mt-1 font-sans text-xs text-[#9E7676] truncate">
                         {video.url}
                       </p>
@@ -280,7 +322,7 @@ export function VDFVideoFiles() {
                         {new Date(video.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
