@@ -90,9 +90,6 @@ app/
     completion/route.ts       # Callback from compile service
     protected/
       begin_compile/route.ts  # Trigger compilation
-      delete_frames/route.ts  # Delete individual frames
-      delete_video/route.ts   # Delete a video + frames
-      rename_video/route.ts   # Rename a video
 components/                   # Reusable UI and feature components
 lib/supabase/                 # Supabase client helpers (browser, server, admin)
 ```
