@@ -125,15 +125,6 @@ export default function VDFHero() {
                 </div>
               </div>
 
-              {/* Tile 6 - remaining space */}
-              <div className="col-span-1 row-span-1 overflow-hidden rounded-lg shadow-md">
-                <div className="relative h-full w-full bg-[#9E7676]/10 flex items-center justify-center">
-                  <div className="text-center px-3">
-                    <p className="font-serif text-2xl font-bold text-[#594545]">+</p>
-                    <p className="font-sans text-xs text-[#9E7676] mt-1">more frames</p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -163,18 +154,6 @@ export default function VDFHero() {
                 <div className="absolute inset-0 bg-[#9E7676]/20 mix-blend-multiply" />
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Bottom stats bar */}
-        <div className="mt-16 lg:mt-24">
-          <div className="h-px w-full bg-[#9E7676]/20" />
-          <div className="flex flex-col items-center justify-center gap-6 py-6 sm:flex-row sm:gap-12">
-            <p className="font-sans text-sm text-[#9E7676]">{"10,000+ videos studied"}</p>
-            <div className="hidden h-4 w-px bg-[#9E7676]/20 sm:block" />
-            <p className="font-sans text-sm text-[#9E7676]">Frame-by-frame clarity</p>
-            <div className="hidden h-4 w-px bg-[#9E7676]/20 sm:block" />
-            <p className="font-sans text-sm text-[#9E7676]">Free to start</p>
           </div>
         </div>
       </div>
