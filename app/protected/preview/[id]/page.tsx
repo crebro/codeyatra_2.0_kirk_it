@@ -268,34 +268,20 @@ export default function PreviewPage() {
                     }
                   }}
                 />
-                {/* <button
-                  onClick={() => handleDeleteFrame(frames[currentIndex].id)}
-                  disabled={deletingFrameId === frames[currentIndex].id}
-                  className="absolute top-3 right-3 bg-red-600/90 hover:bg-red-700 text-white rounded-md px-3 py-1.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium disabled:opacity-50 shadow-lg"
-                  title="Delete this frame"
-                >
-                  {deletingFrameId === frames[currentIndex].id ? "Deleting..." : (
-                    <>
-                      <span>✕</span>
-                      <span>Delete Frame</span>
-                    </>
-                  )}
-                </button> */}
               </div>
-
-<button
-                  onClick={() => handleDeleteFrame(frames[currentIndex].id)}
-                  disabled={deletingFrameId === frames[currentIndex].id}
-                  className="absolute top-3 right-3 bg-red-600/90 hover:bg-red-700 text-white rounded-md px-3 py-1.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium disabled:opacity-50 shadow-lg"
-                  title="Delete this frame"
-                >
-                  {deletingFrameId === frames[currentIndex].id ? "Deleting..." : (
-                    <>
-                      <span>✕</span>
-                      <span>Delete Frame</span>
-                    </>
-                  )}
-                </button>
+              <button
+                onClick={() => handleDeleteFrame(frames[currentIndex].id)}
+                disabled={deletingFrameId === frames[currentIndex].id}
+                className="absolute top-3 right-3 bg-red-600/90 hover:bg-red-700 text-white rounded-md px-3 py-1.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium disabled:opacity-50 shadow-lg"
+                title="Delete this frame"
+              >
+                {deletingFrameId === frames[currentIndex].id ? "Deleting..." : (
+                  <>
+                    <span>✕</span>
+                    <span>Delete Frame</span>
+                  </>
+                )}
+              </button>
             </div>
             {/* Slide counter + nav */}
             <div className="flex items-center justify-center gap-3 pb-3">
