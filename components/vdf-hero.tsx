@@ -34,12 +34,8 @@ export default function VDFHero() {
             <h1 className="font-serif text-5xl font-bold leading-[1.1] text-[#594545] md:text-6xl lg:text-7xl" style={{ textWrap: "balance" }}>
               Study Different.
               <br />
-              Study
+              Study <span className="text-black"> Better. </span>
               <br/>
-              <ul className="text-[#000000]">
-                Better.
-              </ul>
-              
             </h1>
 
             <p className="max-w-md font-sans text-lg leading-relaxed text-[#815B5B]">
