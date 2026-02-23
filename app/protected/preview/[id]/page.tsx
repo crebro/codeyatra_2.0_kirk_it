@@ -210,7 +210,7 @@ export default function PreviewPage() {
                   <div className="flex-1 overflow-hidden rounded-sm border border-[#9E7676]/20 bg-white">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={f.url}
+                      src={`${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${f.url}`}
                       alt={`Slide ${i + 1}`}
                       className="w-full aspect-video object-cover"
                     />
@@ -229,7 +229,7 @@ export default function PreviewPage() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={frames[currentIndex].url}
+                  src={`${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frames[currentIndex].url}`}
                   alt={`Slide ${currentIndex + 1}`}
                   className="w-full h-full object-contain bg-black"
                 />
