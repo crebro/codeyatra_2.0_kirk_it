@@ -72,7 +72,8 @@ export default function PreviewPage() {
         .from("video_frames")
         .select("*")
         .eq("video_id", videoId)
-        .order("id", { ascending: true });
+        .order("ts", { ascending: true })
+        .order("created_at", { ascending: true });
 
       if (!framesError && framesData) {
         setFrames(framesData as FrameImage[]);
