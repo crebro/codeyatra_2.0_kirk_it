@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-
+import { jsPDF } from "jspdf";
 interface VideoUrl {
   id: string;
   user_id: string;
@@ -18,6 +18,7 @@ interface FrameImage {
   id: string;
   video_id: string;
   url: string;
+  captions: string;
 }
 
 /* Mock descriptions — one per slide, cycling */
@@ -107,23 +108,170 @@ export default function PreviewPage() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [frames.length]);
 
-  const handleSaveAsPdf = () => {
-    if (frames.length === 0) return;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    const t = video?.video_title || "Video Frames";
-    const imagesHtml = frames
-      .map(
-        (frame, index) =>
-          `<div style="page-break-inside: avoid; margin-bottom: 20px; text-align: center;">
-            <img src="${frame.url}" style="max-width: 100%; height: auto; border-radius: 8px;" crossorigin="anonymous" />
-            <p style="margin-top: 8px; color: #666; font-size: 14px;">Page ${index + 1}</p>
-          </div>`
-      )
-      .join("");
-    printWindow.document.write(`<html><head><title>VDF - ${t}</title><style>body{font-family:sans-serif;padding:40px}h1{text-align:center;margin-bottom:30px}</style></head><body><h1>VDF - ${t}</h1>${imagesHtml}<script>window.onload=function(){setTimeout(function(){window.print();window.close()},1000)}</script></body></html>`);
-    printWindow.document.close();
-  };
+
+const handleSaveAsPdf = async () => {
+  if (frames.length === 0) return;
+
+  let pdf: jsPDF | null = null;
+
+  for (let i = 0; i < frames.length; i++) {
+    const frame = frames[i];
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}`;
+
+    await new Promise((resolve) => {
+      img.onload = resolve;
+    });
+
+    const imgWidth = img.width;
+    const imgHeight = img.height;
+
+    if (i === 0) {
+      // Create first page using image dimensions
+      pdf = new jsPDF({
+        orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+        unit: "px",
+        format: [imgWidth, imgHeight],
+      });
+    } else {
+      // Add page with exact image dimensions
+      pdf!.addPage([imgWidth, imgHeight], imgWidth > imgHeight ? "landscape" : "portrait");
+    }
+
+    pdf!.addImage(img, "JPEG", 0, 0, imgWidth, imgHeight);
+  }
+
+  pdf!.save("frames.pdf");
+};
+
+// const handleSaveAsPdf = async () => {
+//   if (frames.length === 0) return;
+
+//   const pdf = new jsPDF({
+//     orientation: "portrait",
+//     unit: "px",
+//     format: "a4",
+//   });
+
+//   for (let i = 0; i < frames.length; i++) {
+//     const frame = frames[i];
+
+//     const img = new Image();
+//     img.crossOrigin = "anonymous";
+//     img.src = `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}`;
+
+//     await new Promise((resolve) => {
+//       img.onload = resolve;
+//     });
+
+//     const pageWidth = pdf.internal.pageSize.getWidth();
+//     const pageHeight = pdf.internal.pageSize.getHeight();
+
+//     // Fit image proportionally to page
+//     const imgRatio = img.width / img.height;
+//     const pageRatio = pageWidth / pageHeight;
+
+//     let renderWidth, renderHeight;
+
+//     if (imgRatio > pageRatio) {
+//       renderWidth = pageWidth;
+//       renderHeight = pageWidth / imgRatio;
+//     } else {
+//       renderHeight = pageHeight;
+//       renderWidth = pageHeight * imgRatio;
+//     }
+
+//     const x = (pageWidth - renderWidth) / 2;
+//     const y = (pageHeight - renderHeight) / 2;
+
+//     if (i !== 0) pdf.addPage();
+
+//     pdf.addImage(img, "JPEG", x, y, renderWidth, renderHeight);
+//   }
+
+//   pdf.save("frames.pdf");
+// };
+
+//   const handleSaveAsPdf = () => {
+//   if (frames.length === 0) return;
+
+//   const printWindow = window.open("", "_blank");
+//   if (!printWindow) return;
+
+//   const imagesHtml = frames
+//     .map(
+//       (frame) => `
+//         <div class="page">
+//           <img src="${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}" />
+//         </div>
+//       `
+//     )
+//     .join("");
+
+//   printWindow.document.write(`
+//     <html>
+//       <head>
+//         <title>PDF</title>
+//         <style>
+//           @page {
+//             margin: 0;
+//           }
+
+//           html, body {
+//             margin: 0;
+//             padding: 0;
+//           }
+
+//           .page {
+//             width: 100vw;
+//             height: 100vh;
+//             page-break-after: always;
+//           }
+
+//           img {
+//             width: 100%;
+//             height: 100%;
+//             object-fit: contain; /* use 'cover' if you want full bleed */
+//             display: block;
+//           }
+//         </style>
+//       </head>
+//       <body>
+//         ${imagesHtml}
+//         <script>
+//           window.onload = function() {
+//             setTimeout(function() {
+//               window.print();
+//               window.close();
+//             }, 500);
+//           };
+//         </script>
+//       </body>
+//     </html>
+//   `);
+
+//   printWindow.document.close();
+// };
+
+  // const handleSaveAsPdf = () => {
+  //   if (frames.length === 0) return;
+  //   const printWindow = window.open("", "_blank");
+  //   if (!printWindow) return;
+  //   const t = video?.video_title || "Video Frames";
+  //   const imagesHtml = frames
+  //     .map(
+  //       (frame, index) =>
+  //         `<div style="page-break-inside: avoid; margin-bottom: 20px; text-align: center;">
+  //           <img src="${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}" style="max-width: 100%; height: auto; border-radius: 8px;" crossorigin="anonymous" />
+  //           <p style="margin-top: 8px; color: #666; font-size: 14px;">Page ${index + 1}</p>
+  //         </div>`
+  //     )
+  //     .join("");
+  //   printWindow.document.write(`<html><head><title>VDF - ${t}</title><style>body{font-family:sans-serif;padding:40px}h1{text-align:center;margin-bottom:30px}</style></head><body><h1>VDF - ${t}</h1>${imagesHtml}<script>window.onload=function(){setTimeout(function(){window.print();window.close()},1000)}</script></body></html>`);
+  //   printWindow.document.close();
+  // };
 
   /* Stable descriptions per frame */
   const descriptions = useMemo(
@@ -274,7 +422,7 @@ export default function PreviewPage() {
 
             <div className="px-4 py-4">
               <p className="font-sans text-sm leading-relaxed text-[#594545]">
-                {descriptions[currentIndex]}
+                {frames[currentIndex].captions}
               </p>
             </div>
 
@@ -285,7 +433,7 @@ export default function PreviewPage() {
                 All slides
               </p>
               <div className="flex flex-col gap-1">
-                {frames.map((_, i) => (
+                {frames.map((f, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentIndex(i)}
@@ -296,7 +444,7 @@ export default function PreviewPage() {
                     }`}
                   >
                     <span className="font-medium">Slide {i + 1}:</span>{" "}
-                    {descriptions[i].slice(0, 60)}...
+                    {f.captions.slice(0, 60)}...
                   </button>
                 ))}
               </div>
