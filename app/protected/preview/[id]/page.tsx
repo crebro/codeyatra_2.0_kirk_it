@@ -18,26 +18,7 @@ interface FrameImage {
   id: string;
   video_id: string;
   url: string;
-}
-
-/* Mock descriptions — one per slide, cycling */
-const MOCK_DESCRIPTIONS = [
-  "This slide introduces the main topic and sets the context for the discussion. The speaker outlines the key goals and what the audience can expect to learn.",
-  "A detailed breakdown of the core concepts is presented here, with visual aids to support the explanation. Key terminology is defined for clarity.",
-  "The speaker transitions to a real-world example, demonstrating how the theory applies in practice. Supporting data points are highlighted.",
-  "This section covers the methodology and approach used. Step-by-step instructions are provided for reproducibility.",
-  "A comparative analysis is shown, contrasting different approaches and their trade-offs. The speaker emphasizes the recommended path.",
-  "Visual data — charts or diagrams — illustrate trends and patterns. The speaker walks through the most significant data points.",
-  "The speaker addresses common misconceptions and frequently asked questions. Clarifications are given with concrete examples.",
-  "An interactive segment where the audience or viewers are encouraged to reflect on the material presented so far.",
-  "Advanced concepts and edge cases are discussed. The speaker shares tips from personal experience in the field.",
-  "A summary of all key takeaways is presented. Action items and next steps are listed for the audience to follow up on.",
-  "The speaker shares supplementary resources, links, and references for deeper exploration of the topic.",
-  "A brief Q&A-style recap where the most important points are revisited in a concise question-and-answer format.",
-];
-
-function getSlideDescription(index: number): string {
-  return MOCK_DESCRIPTIONS[index % MOCK_DESCRIPTIONS.length];
+  caption: string | null;
 }
 
 export default function PreviewPage() {
@@ -49,6 +30,9 @@ export default function PreviewPage() {
   const [frames, setFrames] = useState<FrameImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  
+  // Delete frame state
+  const [deletingFrameId, setDeletingFrameId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -75,7 +59,11 @@ export default function PreviewPage() {
         .order("id", { ascending: true });
 
       if (!framesError && framesData) {
+        console.log("[Preview] Fetched frames:", framesData);
+        console.log("[Preview] BASEURL:", process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL);
         setFrames(framesData as FrameImage[]);
+      } else {
+        console.log("[Preview] Frames error:", framesError);
       }
     } catch {
       // silently fail
@@ -106,6 +94,21 @@ export default function PreviewPage() {
     return () => window.removeEventListener("keydown", handleKey);
   }, [frames.length]);
 
+  // Delete frame from database
+  const handleDeleteFrame = async (frameId: string) => {
+    if (deletingFrameId) return;
+    setDeletingFrameId(frameId);
+    try {
+      const supabase = createClient();
+      await supabase.from("video_frames").delete().eq("id", frameId);
+      setFrames((prev) => prev.filter((f) => f.id !== frameId));
+    } catch {
+      // silently fail
+    } finally {
+      setDeletingFrameId(null);
+    }
+  };
+
   const handleSaveAsPdf = () => {
     if (frames.length === 0) return;
     const printWindow = window.open("", "_blank");
@@ -123,12 +126,6 @@ export default function PreviewPage() {
     printWindow.document.write(`<html><head><title>VDF - ${t}</title><style>body{font-family:sans-serif;padding:40px}h1{text-align:center;margin-bottom:30px}</style></head><body><h1>VDF - ${t}</h1>${imagesHtml}<script>window.onload=function(){setTimeout(function(){window.print();window.close()},1000)}</script></body></html>`);
     printWindow.document.close();
   };
-
-  /* Stable descriptions per frame */
-  const descriptions = useMemo(
-    () => frames.map((_, i) => getSlideDescription(i)),
-    [frames]
-  );
 
   if (loading) {
     return (
@@ -155,30 +152,36 @@ export default function PreviewPage() {
     <div className="flex flex-col h-[calc(100vh-57px)]">
       {/* Toolbar */}
       <div className="flex items-center justify-between border-b border-[#9E7676]/15 bg-[#FFF8EA] px-4 py-2">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <button
             onClick={() => router.push("/protected?tab=files")}
-            className="rounded-md px-2 py-1 font-sans text-xs font-medium text-[#815B5B] transition-colors hover:bg-[#9E7676]/10"
+            className="rounded-md px-2 py-1 font-sans text-xs font-medium text-[#815B5B] transition-colors hover:bg-[#9E7676]/10 flex-shrink-0"
           >
             ← Back
           </button>
-          <div className="h-4 w-px bg-[#9E7676]/20" />
-          <h1 className="font-serif text-base font-semibold text-[#594545] truncate max-w-xs">
-            {title}
-          </h1>
-          <span className="rounded-full bg-[#594545]/10 px-2 py-0.5 font-sans text-[10px] font-medium text-[#594545]">
-            {frames.length} slide{frames.length !== 1 ? "s" : ""}
-          </span>
+          <div className="h-4 w-px bg-[#9E7676]/20 flex-shrink-0" />
+          
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <h1 className="font-serif text-base font-semibold text-[#594545] truncate">
+              {title}
+            </h1>
+            <span className="rounded-full bg-[#594545]/10 px-2 py-0.5 font-sans text-[10px] font-medium text-[#594545] flex-shrink-0">
+              {frames.length} slide{frames.length !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
-        {frames.length > 0 && (
-          <Button
-            onClick={handleSaveAsPdf}
-            size="sm"
-            className="bg-[#815B5B] text-[#FFF8EA] hover:bg-[#594545] font-sans text-xs rounded-full px-4"
-          >
-            Save as PDF
-          </Button>
-        )}
+        
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {frames.length > 0 && (
+            <Button
+              onClick={handleSaveAsPdf}
+              size="sm"
+              className="bg-[#815B5B] text-[#FFF8EA] hover:bg-[#594545] font-sans text-xs rounded-full px-4"
+            >
+              📄 Save as PDF
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Main area */}
@@ -194,29 +197,38 @@ export default function PreviewPage() {
             style={{ scrollbarWidth: "thin", scrollbarColor: "#9E7676 transparent" }}
           >
             {frames.map((f, i) => (
-              <button
-                key={f.id}
-                onClick={() => setCurrentIndex(i)}
-                className={`mb-2 w-full rounded transition-all ${
-                  i === currentIndex
-                    ? "ring-2 ring-[#815B5B] ring-offset-1 ring-offset-[#FFF0D6] shadow-md"
-                    : "opacity-70 hover:opacity-100"
-                }`}
-              >
-                <div className="flex items-start gap-1.5">
-                  <span className="shrink-0 pt-1 font-sans text-[10px] text-[#9E7676] w-3 text-right">
-                    {i + 1}
-                  </span>
-                  <div className="flex-1 overflow-hidden rounded-sm border border-[#9E7676]/20 bg-white">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={f.url}
-                      alt={`Slide ${i + 1}`}
-                      className="w-full aspect-video object-cover"
-                    />
+              <div key={f.id} className="mb-2 w-full relative group">
+                <button
+                  onClick={() => setCurrentIndex(i)}
+                  className={`w-full rounded transition-all ${
+                    i === currentIndex
+                      ? "ring-2 ring-[#815B5B] ring-offset-1 ring-offset-[#FFF0D6] shadow-md"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <div className="flex items-start gap-1.5">
+                    <span className="shrink-0 pt-1 font-sans text-[10px] text-[#9E7676] w-3 text-right">
+                      {i + 1}
+                    </span>
+                    <div className="flex-1 overflow-hidden rounded-sm border border-[#9E7676]/20 bg-white">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={f.url.startsWith("http") ? f.url : `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${f.url}`}
+                        alt={`Slide ${i + 1}`}
+                        className="w-full aspect-video object-cover"
+                      />
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+                <button
+                  onClick={() => handleDeleteFrame(f.id)}
+                  disabled={deletingFrameId === f.id}
+                  className="absolute top-1 right-1 bg-red-600/90 hover:bg-red-700 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs font-bold disabled:opacity-50"
+                  title="Delete this frame"
+                >
+                  {deletingFrameId === f.id ? "..." : "✕"}
+                </button>
+              </div>
             ))}
           </div>
 
@@ -224,15 +236,39 @@ export default function PreviewPage() {
           <div className="flex-1 flex flex-col bg-[#594545]/90 min-w-0">
             <div className="flex-1 flex items-center justify-center p-6">
               <div
-                className="bg-white rounded shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-hidden"
+                className="bg-white rounded shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-hidden relative group"
                 style={{ maxWidth: "100%", maxHeight: "100%", aspectRatio: "16 / 9", width: "100%" }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={frames[currentIndex].url}
+                  src={frames[currentIndex].url.startsWith("http") ? frames[currentIndex].url : `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frames[currentIndex].url}`}
                   alt={`Slide ${currentIndex + 1}`}
-                  className="w-full h-full object-contain bg-black"
+                  className="w-full h-full object-contain bg-neutral-900"
+                  onError={(e) => {
+                    const el = e.target as HTMLImageElement;
+                    el.style.display = "none";
+                    if (el.parentElement && !el.parentElement.querySelector(".img-error")) {
+                      const msg = document.createElement("div");
+                      msg.className = "img-error";
+                      msg.style.cssText = "display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#9E7676;font-size:14px;font-family:sans-serif;text-align:center;padding:20px;";
+                      msg.textContent = `Failed to load image: ${frames[currentIndex].url}`;
+                      el.parentElement.appendChild(msg);
+                    }
+                  }}
                 />
+                <button
+                  onClick={() => handleDeleteFrame(frames[currentIndex].id)}
+                  disabled={deletingFrameId === frames[currentIndex].id}
+                  className="absolute top-3 right-3 bg-red-600/90 hover:bg-red-700 text-white rounded-md px-3 py-1.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium disabled:opacity-50 shadow-lg"
+                  title="Delete this frame"
+                >
+                  {deletingFrameId === frames[currentIndex].id ? "Deleting..." : (
+                    <>
+                      <span>✕</span>
+                      <span>Delete Frame</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
             {/* Slide counter + nav */}
@@ -273,7 +309,7 @@ export default function PreviewPage() {
 
             <div className="px-4 py-4">
               <p className="font-sans text-sm leading-relaxed text-[#594545]">
-                {descriptions[currentIndex]}
+                {frames[currentIndex].caption || "No caption available"}
               </p>
             </div>
 
@@ -284,7 +320,7 @@ export default function PreviewPage() {
                 All slides
               </p>
               <div className="flex flex-col gap-1">
-                {frames.map((_, i) => (
+                {frames.map((frame, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentIndex(i)}
@@ -295,7 +331,7 @@ export default function PreviewPage() {
                     }`}
                   >
                     <span className="font-medium">Slide {i + 1}:</span>{" "}
-                    {descriptions[i].slice(0, 60)}...
+                    {frame.caption ? frame.caption.slice(0, 60) + (frame.caption.length > 60 ? "..." : "") : "No caption"}
                   </button>
                 ))}
               </div>

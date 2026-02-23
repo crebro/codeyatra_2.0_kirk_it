@@ -33,6 +33,9 @@ export function VDFVideoFiles() {
   const [videos, setVideos] = useState<VideoUrl[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [frameCounts, setFrameCounts] = useState<Record<string, number>>({});
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renameSaving, setRenameSaving] = useState(false);
 
   const fetchVideos = useCallback(async () => {
     setLoadingVideos(true);
@@ -86,16 +89,59 @@ export function VDFVideoFiles() {
     router.push(`/protected/preview/${video.id}`);
   };
 
+  const startRename = (video: VideoUrl, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenamingId(video.id);
+    setRenameValue(video.video_title || "");
+  };
+
+  const saveRename = async (videoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenameSaving(true);
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("video_urls")
+        .update({ video_title: renameValue.trim() || null })
+        .eq("id", videoId);
+      await fetchVideos();
+      setRenamingId(null);
+    } catch {
+      // silently fail
+    } finally {
+      setRenameSaving(false);
+    }
+  };
+
+  const cancelRename = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenamingId(null);
+    setRenameValue("");
+  };
+
+  const handleDelete = async (videoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this slide and all its frames?")) return;
+    try {
+      const supabase = createClient();
+      await supabase.from("video_frames").delete().eq("video_id", videoId);
+      await supabase.from("video_urls").delete().eq("id", videoId);
+      await fetchVideos();
+    } catch {
+      // silently fail
+    }
+  };
+
   return (
     <div className="w-full">
       <section className="grain-overlay relative w-full px-6 py-16 md:px-12 md:py-24">
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="mb-10 flex items-center justify-between">
             <h2 className="font-serif text-2xl font-bold text-[#594545] md:text-3xl">
-              Your Videos
+              Your Slides
             </h2>
             <span className="rounded-full bg-[#594545] px-3 py-1 font-sans text-xs font-medium text-[#FFF8EA]">
-              {videos.length} video{videos.length !== 1 ? "s" : ""}
+              {videos.length} slide{videos.length !== 1 ? "s" : ""}
             </span>
           </div>
 
@@ -137,10 +183,10 @@ export function VDFVideoFiles() {
                 const title = video.video_title || videoId || "Untitled Video";
 
                 return (
-                  <button
+                  <div
                     key={video.id}
                     onClick={() => handleSelectVideo(video)}
-                    className="group overflow-hidden rounded-lg bg-[#FFF8EA] text-left shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
+                    className="cursor-pointer group overflow-hidden rounded-lg bg-[#FFF8EA] text-left shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
                   >
                     {/* Thumbnail */}
                     <div className="relative">
@@ -169,9 +215,56 @@ export function VDFVideoFiles() {
 
                     {/* Content */}
                     <div className="p-4">
-                      <p className="font-sans text-sm font-medium text-[#594545] truncate group-hover:text-[#815B5B] transition-colors">
-                        {title}
-                      </p>
+                      {renamingId === video.id ? (
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="text"
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveRename(video.id, e as any);
+                              if (e.key === "Escape") cancelRename(e as any);
+                            }}
+                            className="flex-1 rounded border border-[#815B5B] bg-[#FFF8EA] px-2 py-1 font-sans text-sm text-[#594545] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
+                            autoFocus
+                          />
+                          <button
+                            onClick={(e) => saveRename(video.id, e)}
+                            disabled={renameSaving}
+                            className="rounded bg-[#815B5B] px-2 py-1 font-sans text-xs text-[#FFF8EA] hover:bg-[#594545] disabled:opacity-50"
+                          >
+                            {renameSaving ? "..." : "✓"}
+                          </button>
+                          <button
+                            onClick={cancelRename}
+                            className="rounded bg-[#9E7676] px-2 py-1 font-sans text-xs text-[#FFF8EA] hover:bg-[#815B5B]"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-sans text-sm font-medium text-[#594545] truncate group-hover:text-[#815B5B] transition-colors flex-1">
+                            {title}
+                          </p>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={(e) => startRename(video, e)}
+                              className="rounded p-1 text-[#815B5B] hover:bg-[#815B5B]/10 transition-colors"
+                              title="Rename slide"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={(e) => handleDelete(video.id, e)}
+                              className="rounded p-1 text-red-600 hover:bg-red-50 transition-colors"
+                              title="Delete slide"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       <p className="mt-1 font-sans text-xs text-[#9E7676] truncate">
                         {video.url}
                       </p>
@@ -179,7 +272,7 @@ export function VDFVideoFiles() {
                         {new Date(video.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
