@@ -204,9 +204,7 @@ export default function ExtractViewer({
             Back
           </button>
           <div className="hidden sm:block h-5 w-px bg-[#594545]/10" />
-          <span className="hidden sm:block font-serif text-sm font-semibold text-[#594545]">
-            VDF
-          </span>
+          <img src="https://i.imgur.com/3HcwFNF.png" alt="Logo" className="hidden sm:block h-6" />
         </div>
 
         <div className="flex items-center gap-2">

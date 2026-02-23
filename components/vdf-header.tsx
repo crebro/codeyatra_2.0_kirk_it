@@ -11,7 +11,8 @@ export default function VDFHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12 lg:px-20">
         <div className="flex items-center gap-8">
           <Link href="/" className="font-serif text-xl font-bold text-[#594545]">
-            VDF
+            <img src="https://i.imgur.com/3HcwFNF.png" alt="Logo">
+            </img>
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
             <a href="#get-started" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
