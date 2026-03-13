@@ -4,41 +4,42 @@ export async function imagesToOriginalSizePdf(imageInstances: HTMLImageElement[]
   unit: 'px', // Using pixels to match image dimensions
   compress: true // Compress PDF to reduce file size
 }) {
-  const doc = new jsPDF({
-    unit: "px"
-    // No format specified - pages will match image sizes
-  });
+  if (imageInstances.length === 0) return;
+
+  let pdf: jsPDF | null = null;
 
   for (let i = 0; i < imageInstances.length; i++) {
     const img = imageInstances[i];
-    
-    try {
-      // Create a page matching the image dimensions
-      const width = img.width;
-      const height = img.height;
-      
-      // For first page, we're already on it
-        doc.addPage([width, height], img.width > img.height ? 'landscape' : 'portrait');
-      
-      // Add image at full size (0,0 coordinates)
-      doc.addImage({
-        imageData: img,
-        x: 0,
-        y: 0,
-        width: width,
-        height: height,
-        compression: options.compress ? 'FAST' : 'NONE'
+
+    // Wait for image to load if not already loaded
+    if (!img.complete) {
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = () => reject(new Error(`Failed to load image at index ${i}`));
       });
-      
-    } catch (error) {
-      console.error(`Error processing image ${i + 1}:`, error);
-      continue;
     }
+
+    const imgWidth = img.width;
+    const imgHeight = img.height;
+
+    if (i === 0) {
+      // Create first page using image dimensions
+      pdf = new jsPDF({
+        orientation: imgWidth > imgHeight ? "landscape" : "portrait",
+        unit: "px",
+        format: [imgWidth, imgHeight],
+        compress: options.compress
+      });
+    } else {
+      // Add page with exact image dimensions
+      pdf!.addPage([imgWidth, imgHeight], imgWidth > imgHeight ? "landscape" : "portrait");
+    }
+
+    pdf!.addImage(img, "JPEG", 0, 0, imgWidth, imgHeight, undefined, options.compress ? 'FAST' : 'NONE');
   }
 
-  return doc.output('blob');
+  return pdf?.output('blob');
 }
-
 
 export default async function loadImageFromBlob(blobUrl: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {

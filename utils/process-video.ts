@@ -94,6 +94,7 @@ export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallbac
     }
 
     await imagesToOriginalSizePdf(allFiles).then(pdfBlob => {
+        if (!pdfBlob) return;
         // Create download link
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
@@ -101,11 +102,10 @@ export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallbac
         a.download = 'video2doc-output.pdf';
         a.click();
 
-        // Clean u
+        // Clean up
         setTimeout(() => URL.revokeObjectURL(url), 100);
     })
         .catch(error => {
             console.error('PDF generation failed:', error);
         });;
-
 }

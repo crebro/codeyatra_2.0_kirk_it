@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { jsPDF } from "jspdf";
+import { imagesToOriginalSizePdf } from "@/utils/load-image-from-blob";
+
 interface VideoUrl {
   id: string;
   user_id: string;
@@ -113,39 +114,31 @@ export default function PreviewPage() {
   const handleSaveAsPdf = async () => {
     if (frames.length === 0) return;
 
-    let pdf: jsPDF | null = null;
+    try {
+      const imageInstances: HTMLImageElement[] = [];
 
-    for (let i = 0; i < frames.length; i++) {
-      const frame = frames[i];
-
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}`;
-
-      await new Promise((resolve) => {
-        img.onload = resolve;
-      });
-
-      const imgWidth = img.width;
-      const imgHeight = img.height;
-
-      if (i === 0) {
-        // Create first page using image dimensions
-        pdf = new jsPDF({
-          orientation: imgWidth > imgHeight ? "landscape" : "portrait",
-          unit: "px",
-          format: [imgWidth, imgHeight],
-        });
-      } else {
-        // Add page with exact image dimensions
-        pdf!.addPage([imgWidth, imgHeight], imgWidth > imgHeight ? "landscape" : "portrait");
+      for (let i = 0; i < frames.length; i++) {
+        const frame = frames[i];
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = `${process.env.NEXT_PUBLIC_COMPILE_REQUEST_SERVICE_BASEURL}${frame.url}`;
+        imageInstances.push(img);
       }
 
-      pdf!.addImage(img, "JPEG", 0, 0, imgWidth, imgHeight);
+      const pdfBlob = await imagesToOriginalSizePdf(imageInstances);
+      if (pdfBlob) {
+        const url = URL.createObjectURL(pdfBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "frames.pdf";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+      }
+    } catch (error) {
+      console.error("Failed to generate PDF:", error);
     }
-
-    pdf!.save("frames.pdf");
   };
+
 
   if (loading) {
     return (
