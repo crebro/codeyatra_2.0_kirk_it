@@ -10,7 +10,7 @@ export default function VDFInputSection() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (url.trim()) {
-      router.push(`/extract?url=${encodeURIComponent(url.trim())}`)
+      router.push(`/video?url=${encodeURIComponent(url.trim())}`)
     }
   }
 
