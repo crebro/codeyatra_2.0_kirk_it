@@ -15,29 +15,24 @@ export default function VDFHeader({ fixed = true }: { fixed?: boolean }) {
             </img>
           </Link>
           <nav className="hidden items-center gap-6 md:flex">
-            <a href="#get-started" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
+            <a href="/#get-started" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
               Get Started
             </a>
-            <a href="#pricing" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
-              Pricing
-            </a>
+            <Link href="/library" className="font-sans text-sm text-[#815B5B] transition-colors hover:text-[#594545]">
+              Library
+            </Link>
           </nav>
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
           <Link
-            href="/auth/login"
-            className="rounded-full border border-[#594545]/15 bg-[#FFF8EA] px-5 py-2 font-sans text-sm font-medium text-[#594545] transition-colors hover:bg-[#FFF0D6]"
+            href="/video"
+            className="rounded-full bg-[#594545] px-6 py-2.5 font-sans text-sm font-bold text-[#FFF8EA] transition-all hover:bg-[#815B5B] shadow-lg active:scale-95"
           >
-            Log in
-          </Link>
-          <Link
-            href="/auth/sign-up"
-            className="rounded-full bg-[#594545] px-5 py-2 font-sans text-sm font-medium text-[#FFF8EA] transition-colors hover:bg-[#815B5B]"
-          >
-            Sign up
+            Start Converting
           </Link>
         </div>
+
 
         {/* Mobile menu toggle */}
         <button

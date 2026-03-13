@@ -7,9 +7,12 @@ import VDFFooter from "@/components/vdf-footer";
 import { Loader2, Download, Play, AlertCircle, FileUp, CheckCircle2 } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { toBlobURL } from '@ffmpeg/util';
-import { convertToPdf } from '@/utils/process-video';
+import { extractFrames } from '@/utils/process-video';
+import { saveExtraction } from '@/utils/db';
+import { useRouter } from 'next/navigation';
 
 function VideoUploadSection() {
+    const router = useRouter();
     const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<string>("");
@@ -41,17 +44,36 @@ function VideoUploadSection() {
             const arrayBuffer = await file.arrayBuffer();
             await instance.writeFile('input.mp4', new Uint8Array(arrayBuffer));
 
-            setStatus("Converting to PDF (extracting frames)...");
-            await convertToPdf('input.mp4', instance, (log: any) => {
+            setStatus("Extracting frames...");
+            const frames = await extractFrames('input.mp4', instance, (log: any) => {
                 const message = log.message || "";
-                if (message) setStatus(`Converting: ${message.substring(0, 50)}...`);
-
+                if (message) setStatus(`Processing: ${message.substring(0, 50)}...`);
             }, (progress: number) => {
                 setProgress(progress);
             });
 
-            setStatus("Conversion complete!");
+            setStatus("Saving locally...");
+            const extractionId = crypto.randomUUID();
+            await saveExtraction({
+                id: extractionId,
+                url: file.name,
+                title: file.name.split('.').slice(0, -1).join('.'),
+                createdAt: Date.now()
+            }, frames.map(f => ({
+                videoId: extractionId,
+                blob: f.blob,
+                timestamp: f.timestamp,
+                index: f.index
+            })));
+
+            setStatus("Done! Redirecting...");
             setIsDone(true);
+            
+            // Short delay to show success state
+            setTimeout(() => {
+                router.push(`/preview/${extractionId}`);
+            }, 1000);
+
         } catch (error: any) {
             console.error(error);
             setStatus(`Error: ${error.message}`);
@@ -59,6 +81,7 @@ function VideoUploadSection() {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="w-full mt-12 pt-12 border-t-2 border-[#594545]/10">

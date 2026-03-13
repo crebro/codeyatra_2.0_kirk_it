@@ -32,7 +32,18 @@ export const getDuration = async (inputFile: string, ffmpeg: FFmpeg) => {
     return (hours * 3600) + (minutes * 60) + seconds;
 };
 
-export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallback: (message: { message: string }) => void, progressCallback: (progress: number) => void) => {
+export interface ExtractedFrame {
+    blob: Blob;
+    timestamp: number;
+    index: number;
+}
+
+export const extractFrames = async (
+    inputFile: string, 
+    ffmpeg: FFmpeg, 
+    logCallback: (message: { message: string }) => void, 
+    progressCallback: (progress: number) => void
+): Promise<ExtractedFrame[]> => {
     let duration = await getDuration(inputFile, ffmpeg);
 
     ffmpeg.on('log', (message: { message: string }) => {
@@ -47,19 +58,19 @@ export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallbac
             progressCallback(progress);
         }
     });
-    // first convert file into mp4 file
+
+    // Extract one frame every 10 seconds
     await ffmpeg.exec([
         '-i', inputFile,
-        '-vf', `fps=1/10`, // Extract one frame every 10 seconds
-        // '-q:v', '2', // Set quality level (lower is better, 1-31)
+        '-vf', `fps=1/10`, 
         'output_%04d.png'
     ]);
 
-    let allFiles: Array<HTMLImageElement> = [];
-
+    let extractedFrames: ExtractedFrame[] = [];
     let uint8Store: Uint8Array | null = null;
+    const interval = 10;
 
-    for (let i = 1; i <= Math.floor(duration / 10); i++) {
+    for (let i = 1; i <= Math.floor(duration / interval); i++) {
         console.log(`Processing frame ${i}`);
         try {
             const fileName = `output_${i.toString().padStart(4, '0')}.png`;
@@ -67,45 +78,60 @@ export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallbac
             // @ts-expect-error
             let buffer = data.buffer;
             let uint8barrayitem = new Uint8Array(buffer);
-            // standardize the image to RGBA format, using context
+            
+            // standardize the image to RGBA format for comparison
             let rgbaImage = await imageToRGBA(uint8barrayitem);
-            uint8barrayitem = rgbaImage.arrayInstance;
+            let currentUint8 = rgbaImage.arrayInstance;
 
             if (uint8Store === null) {
-                uint8Store = uint8barrayitem;
+                uint8Store = currentUint8;
             } else {
-                if (uint8Store.length !== uint8barrayitem.length) {
-                    console.log(`Frame ${i} has different dimensions, updating store.`);
-                } else if (rmsDiff(uint8Store, uint8barrayitem) < 5) {
+                if (uint8Store.length === currentUint8.length && rmsDiff(uint8Store, currentUint8) < 5) {
                     console.log(`Skipping frame ${i} as it is identical to the previous frame.`);
                     continue; // Skip identical frames
                 }
-                // If not identical, update the store
-                uint8Store = uint8barrayitem;
+                uint8Store = currentUint8;
             }
 
-            allFiles.push(rgbaImage.imageInstance);
+            extractedFrames.push({
+                blob: new Blob([uint8barrayitem], { type: 'image/png' }),
+                timestamp: (i - 1) * interval,
+                index: i
+            });
         } catch (e) {
-            console.log(
-                `Error reading file output_${i.toString().padStart(4, '0')}.png: ${e}`
-            );
-            break; // Stop if no more files are found
+            console.log(`Error reading file output_${i.toString().padStart(4, '0')}.png: ${e}`);
+            break; 
         }
     }
 
-    await imagesToOriginalSizePdf(allFiles).then(pdfBlob => {
-        if (!pdfBlob) return;
-        // Create download link
+    return extractedFrames;
+}
+
+// Keep for backward compatibility or simple one-off conversions if needed, 
+// but refactored to use extractFrames
+export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallback: (message: { message: string }) => void, progressCallback: (progress: number) => void) => {
+    const frames = await extractFrames(inputFile, ffmpeg, logCallback, progressCallback);
+    
+    // Convert blobs to HTMLImageElement
+    const images: HTMLImageElement[] = await Promise.all(frames.map(frame => {
+        return new Promise<HTMLImageElement>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.src = URL.createObjectURL(frame.blob);
+        });
+    }));
+
+    const pdfBlob = await imagesToOriginalSizePdf(images);
+    if (pdfBlob) {
         const url = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'video2doc-output.pdf';
         a.click();
-
-        // Clean up
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-    })
-        .catch(error => {
-            console.error('PDF generation failed:', error);
-        });;
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            images.forEach(img => URL.revokeObjectURL(img.src));
+        }, 100);
+    }
 }
+
