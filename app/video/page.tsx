@@ -18,6 +18,31 @@ function VideoUploadSection() {
     const [status, setStatus] = useState<string>("");
     const [progress, setProgress] = useState<number>(0);
     const [isDone, setIsDone] = useState(false);
+    const [selectedType, setSelectedType] = useState("presentation");
+
+    const videoTypes = [
+        {
+            id: "presentation",
+            title: "Moving Presentation / Whiteboard",
+            description: "Best for slides, digital whiteboards, and screenshares.",
+            image: "/graphics/presentation.png",
+            disabled: false
+        },
+        {
+            id: "whiteboard_person",
+            title: "Whiteboard - Moving Person",
+            description: "Optimized for physical whiteboards with a presenter.",
+            image: "/graphics/whiteboard_person.png",
+            disabled: true
+        },
+        {
+            id: "conference",
+            title: "Online conferences",
+            description: "Extract from Zoom, Teams, or Meet recordings.",
+            image: "/graphics/conference.png",
+            disabled: true
+        }
+    ];
 
     const loadFFmpeg = async () => {
         const ffmpegInstance = new FFmpeg();
@@ -68,7 +93,7 @@ function VideoUploadSection() {
 
             setStatus("Done! Redirecting...");
             setIsDone(true);
-            
+
             // Short delay to show success state
             setTimeout(() => {
                 router.push(`/preview/${extractionId}`);
@@ -84,11 +109,55 @@ function VideoUploadSection() {
 
 
     return (
-        <div className="w-full mt-12 pt-12 border-t-2 border-[#594545]/10">
-            <div className="flex flex-col items-center gap-6">
+        <div className="w-full pt-12 border-t-2 border-[#594545]/10">
+            <div className="flex flex-col items-center gap-10">
                 <div className="text-center space-y-2">
                     <h2 className="text-2xl font-bold text-[#594545]">Convert Local Video to PDF</h2>
-                    <p className="text-[#9E7676] text-sm">Upload any video file to extract frames and generate a PDF document.</p>
+                    <p className="text-[#9E7676] text-sm max-w-lg">Choose the video content type to optimize frame extraction and quality.</p>
+                </div>
+
+                {/* Video Type Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+                    {videoTypes.map((type) => (
+                        <div
+                            key={type.id}
+                            onClick={() => !type.disabled && setSelectedType(type.id)}
+                            className={`
+                                group relative flex flex-col items-start p-4 rounded-2xl border-2 transition-all duration-300
+                                ${type.disabled ? 'opacity-60 cursor-not-allowed border-[#9E7676]/10 bg-neutral-50/50' :
+                                    selectedType === type.id ? 'border-[#815B5B] bg-[#FFF0D6] shadow-md scale-[1.02]' :
+                                        'border-[#594545]/10 bg-white hover:border-[#815B5B]/40 hover:bg-[#FFF8EA] shadow-sm cursor-pointer'}
+                            `}
+                        >
+                            <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-neutral-100">
+                                <img
+                                    src={type.image}
+                                    alt={type.title}
+                                    className={`w-full h-full object-cover transition-transform duration-500 ${!type.disabled && 'group-hover:scale-110'}`}
+                                />
+                            </div>
+                            <h3 className={`font-sans text-sm font-bold mb-1 ${selectedType === type.id ? 'text-[#815B5B]' : 'text-[#594545]'}`}>
+                                {type.title}
+                            </h3>
+                            <p className="text-[11px] leading-relaxed text-[#9E7676]">
+                                {type.description}
+                            </p>
+
+                            {type.disabled && (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/40 backdrop-blur-[1px] rounded-2xl">
+                                    <span className="bg-[#594545] text-[#FFF8EA] px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
+                                        Coming Soon
+                                    </span>
+                                </div>
+                            )}
+
+                            {!type.disabled && selectedType === type.id && (
+                                <div className="absolute top-2 right-2 bg-[#815B5B] text-white p-1 rounded-full shadow-sm">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                </div>
+                            )}
+                        </div>
+                    ))}
                 </div>
 
                 <div className="w-full max-w-lg">
@@ -151,6 +220,7 @@ function VideoUploadSection() {
     );
 }
 
+
 function VideoContent() {
     const searchParams = useSearchParams();
     const url = searchParams.get('url');
@@ -193,91 +263,96 @@ function VideoContent() {
         <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 text-[#594545]">
             <div className="w-full max-w-4xl bg-[#FFF0D6] rounded-2xl border-2 border-[#594545] overflow-hidden shadow-xl grain-overlay relative">
                 <div className="p-8 md:p-12 flex flex-col items-center gap-8 relative z-10">
-                    <div className="flex flex-col items-center gap-2 text-center">
-                        <h1 className="text-3xl md:text-4xl font-sans font-bold">
-                            {url ? (loading ? "Processing Video..." : "Ready to Download") : "Video Processing Studio"}
-                        </h1>
-                        {url && (
-                            <p className="text-[#9E7676] font-sans truncate max-w-md">
-                                {url}
-                            </p>
-                        )}
-                    </div>
+                    {url ? <>
+                        <div className="flex flex-col items-center gap-2 text-center">
+                            <h1 className="text-3xl md:text-4xl font-sans font-bold">
+                                {loading ? "Processing Video..." : "Ready to Download"}
+                            </h1>
+                            {url && (
+                                <p className="text-[#9E7676] font-sans truncate max-w-md">
+                                    {url}
+                                </p>
+                            )}
+                        </div>
 
-                    <div className="w-full flex flex-col items-center gap-10">
-                        {url && loading && (
-                            <div className="flex flex-col items-center gap-4 py-12">
-                                <Loader2 className="w-12 h-12 text-[#815B5B] animate-spin" />
-                                <p className="text-[#815B5B] font-medium font-sans">Fetching metadata and links...</p>
-                            </div>
-                        )}
+                        <div className="w-full flex flex-col items-center gap-10">
+                            {url && loading && (
+                                <div className="flex flex-col items-center gap-4 py-12">
+                                    <Loader2 className="w-12 h-12 text-[#815B5B] animate-spin" />
+                                    <p className="text-[#815B5B] font-medium font-sans">Fetching metadata and links...</p>
+                                </div>
+                            )}
 
-                        {url && error && (
-                            <div className="flex flex-col items-center gap-4 py-12 text-center">
-                                <AlertCircle className="w-16 h-16 text-red-500" />
-                                <p className="text-red-500 font-bold text-xl font-sans">{error}</p>
-                                <button
-                                    onClick={() => window.location.href = '/'}
-                                    className="mt-4 rounded-full bg-[#815B5B] px-8 py-3 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545]"
-                                >
-                                    Try Another Link
-                                </button>
-                            </div>
-                        )}
+                            {url && error && (
+                                <div className="flex flex-col items-center gap-4 py-12 text-center">
+                                    <AlertCircle className="w-16 h-16 text-red-500" />
+                                    <p className="text-red-500 font-bold text-xl font-sans">{error}</p>
+                                    <button
+                                        onClick={() => window.location.href = '/'}
+                                        className="mt-4 rounded-full bg-[#815B5B] px-8 py-3 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545]"
+                                    >
+                                        Try Another Link
+                                    </button>
+                                </div>
+                            )}
 
-                        {url && data && !loading && (
-                            <div className="w-full flex flex-col md:flex-row gap-10 items-center md:items-start">
-                                {/* Left side: Thumbnail */}
-                                <div className="w-full md:w-1/2 aspect-video bg-black rounded-xl overflow-hidden shadow-lg border-2 border-[#594545] relative group">
-                                    <img
-                                        src={data.thumbnail}
-                                        alt={data.title}
-                                        className="w-full h-full object-cover opacity-90"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                                        <div className="w-16 h-16 bg-[#815B5B] rounded-full flex items-center justify-center text-white shadow-lg">
-                                            <Play className="w-8 h-8 fill-current translate-x-0.5" />
+                            {url && data && !loading && (
+                                <div className="w-full flex flex-col md:flex-row gap-10 items-center md:items-start">
+                                    {/* Left side: Thumbnail */}
+                                    <div className="w-full md:w-1/2 aspect-video bg-black rounded-xl overflow-hidden shadow-lg border-2 border-[#594545] relative group">
+                                        <img
+                                            src={data.thumbnail}
+                                            alt={data.title}
+                                            className="w-full h-full object-cover opacity-90"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
+                                            <div className="w-16 h-16 bg-[#815B5B] rounded-full flex items-center justify-center text-white shadow-lg">
+                                                <Play className="w-8 h-8 fill-current translate-x-0.5" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right side: Details and Actions */}
+                                    <div className="w-full md:w-1/2 flex flex-col gap-6">
+                                        <div className="space-y-2">
+                                            <h2 className="text-2xl font-bold text-[#594545] line-clamp-2">
+                                                {data.title}
+                                            </h2>
+                                            <div className="h-1 w-20 bg-[#815B5B] rounded-full"></div>
+                                        </div>
+
+                                        <p className="text-[#9E7676] text-sm italic">
+                                            Your high-quality download link has been generated and is ready.
+                                        </p>
+
+                                        <div className="flex flex-col gap-3 mt-auto">
+                                            <a
+                                                href={data.previewUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-full rounded-full bg-[#815B5B] px-8 py-5 font-sans text-lg font-bold text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-xl flex items-center justify-center gap-3 active:scale-95"
+                                            >
+                                                <Download className="w-6 h-6" />
+                                                Download Video
+                                            </a>
+
+                                            <button
+                                                onClick={() => window.location.href = '/'}
+                                                className="w-full rounded-full border-2 border-[#815B5B] px-8 py-4 font-sans text-sm font-medium text-[#815B5B] transition-all hover:bg-[#815B5B] hover:text-[#FFF8EA] text-center"
+                                            >
+                                                Extract Another
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
+                            )}
 
-                                {/* Right side: Details and Actions */}
-                                <div className="w-full md:w-1/2 flex flex-col gap-6">
-                                    <div className="space-y-2">
-                                        <h2 className="text-2xl font-bold text-[#594545] line-clamp-2">
-                                            {data.title}
-                                        </h2>
-                                        <div className="h-1 w-20 bg-[#815B5B] rounded-full"></div>
-                                    </div>
-
-                                    <p className="text-[#9E7676] text-sm italic">
-                                        Your high-quality download link has been generated and is ready.
-                                    </p>
-
-                                    <div className="flex flex-col gap-3 mt-auto">
-                                        <a
-                                            href={data.previewUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="w-full rounded-full bg-[#815B5B] px-8 py-5 font-sans text-lg font-bold text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-xl flex items-center justify-center gap-3 active:scale-95"
-                                        >
-                                            <Download className="w-6 h-6" />
-                                            Download Video
-                                        </a>
-
-                                        <button
-                                            onClick={() => window.location.href = '/'}
-                                            className="w-full rounded-full border-2 border-[#815B5B] px-8 py-4 font-sans text-sm font-medium text-[#815B5B] transition-all hover:bg-[#815B5B] hover:text-[#FFF8EA] text-center"
-                                        >
-                                            Extract Another
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <VideoUploadSection />
-                    </div>
+                        </div>
+                    </>
+                        : <h1 className="text-3xl md:text-4xl font-sans font-bold">
+                            Video Processing Studio
+                        </h1>}
+                    <VideoUploadSection />
                 </div>
             </div>
         </main>
