@@ -36,28 +36,28 @@ export function ForgotPasswordForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       {success ? (
-        <div className="rounded-xl border border-[#9E7676]/15 bg-[#FFF8EA] p-8 shadow-[0_2px_8px_rgba(89,69,69,0.08)]">
+        <div className="rounded-xl border border-vdf-dusty-rose/15 bg-vdf-cream p-8 shadow-[0_2px_8px_rgba(89,69,69,0.08)]">
           <div className="mb-4 flex flex-col gap-1.5">
-            <h2 className="font-serif text-2xl font-bold text-[#594545]">Check Your Email</h2>
-            <p className="font-sans text-sm text-[#9E7676]">Password reset instructions sent</p>
+            <h2 className="font-serif text-2xl font-bold text-vdf-deep-brown">Check Your Email</h2>
+            <p className="font-sans text-sm text-vdf-dusty-rose">Password reset instructions sent</p>
           </div>
-          <p className="font-sans text-sm text-[#815B5B] leading-relaxed">
+          <p className="font-sans text-sm text-vdf-warm-mauve leading-relaxed">
             If you registered using your email and password, you will receive
             a password reset email.
           </p>
         </div>
       ) : (
-        <div className="rounded-xl border border-[#9E7676]/15 bg-[#FFF8EA] p-8 shadow-[0_2px_8px_rgba(89,69,69,0.08)]">
+        <div className="rounded-xl border border-vdf-dusty-rose/15 bg-vdf-cream p-8 shadow-[0_2px_8px_rgba(89,69,69,0.08)]">
           <div className="mb-6 flex flex-col gap-1.5">
-            <h2 className="font-serif text-2xl font-bold text-[#594545]">Reset Your Password</h2>
-            <p className="font-sans text-sm text-[#9E7676]">
+            <h2 className="font-serif text-2xl font-bold text-vdf-deep-brown">Reset Your Password</h2>
+            <p className="font-sans text-sm text-vdf-dusty-rose">
               Type in your email and we&apos;ll send you a link to reset your password
             </p>
           </div>
           <form onSubmit={handleForgotPassword}>
             <div className="flex flex-col gap-5">
               <div className="flex flex-col gap-2">
-                <label htmlFor="email" className="font-sans text-sm font-medium text-[#594545]">
+                <label htmlFor="email" className="font-sans text-sm font-medium text-vdf-deep-brown">
                   Email
                 </label>
                 <input
@@ -67,23 +67,23 @@ export function ForgotPasswordForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border-[1.5px] border-[#9E7676]/30 bg-[#FFF8EA] px-4 py-3 font-sans text-sm text-[#594545] placeholder:text-[#9E7676]/50 transition-colors focus:border-[#815B5B] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
+                  className="w-full rounded-lg border-[1.5px] border-vdf-dusty-rose/30 bg-vdf-cream px-4 py-3 font-sans text-sm text-vdf-deep-brown placeholder:text-vdf-dusty-rose/50 transition-colors focus:border-vdf-warm-mauve focus:outline-none focus:ring-2 focus:ring-vdf-warm-mauve/20"
                 />
               </div>
               {error && <p className="font-sans text-sm text-red-600">{error}</p>}
               <button
                 type="submit"
-                className="w-full rounded-full bg-[#815B5B] px-6 py-3 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-lg disabled:opacity-60"
+                className="w-full rounded-full bg-vdf-warm-mauve px-6 py-3 font-sans text-sm font-medium text-vdf-cream transition-all hover:bg-vdf-deep-brown hover:shadow-lg disabled:opacity-60"
                 disabled={isLoading}
               >
                 {isLoading ? "Sending..." : "Send reset email"}
               </button>
             </div>
-            <div className="mt-5 text-center font-sans text-sm text-[#9E7676]">
+            <div className="mt-5 text-center font-sans text-sm text-vdf-dusty-rose">
               Already have an account?{" "}
               <Link
                 href="/auth/login"
-                className="font-medium text-[#815B5B] transition-colors hover:text-[#594545]"
+                className="font-medium text-vdf-warm-mauve transition-colors hover:text-vdf-deep-brown"
               >
                 Login
               </Link>

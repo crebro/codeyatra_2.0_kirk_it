@@ -109,11 +109,11 @@ function VideoUploadSection() {
 
 
     return (
-        <div className="w-full pt-12 border-t-2 border-[#594545]/10">
+        <div className="w-full pt-12 border-t-2 border-vdf-deep-brown/10">
             <div className="flex flex-col items-center gap-10">
                 <div className="text-center space-y-2">
-                    <h2 className="text-2xl font-bold text-[#594545]">Convert Local Video to PDF</h2>
-                    <p className="text-[#9E7676] text-sm max-w-lg">Choose the video content type to optimize frame extraction and quality.</p>
+                    <h2 className="text-2xl font-bold text-vdf-deep-brown">Convert Local Video to PDF</h2>
+                    <p className="text-vdf-dusty-rose text-sm max-w-lg">Choose the video content type to optimize frame extraction and quality.</p>
                 </div>
 
                 {/* Video Type Selection */}
@@ -124,9 +124,9 @@ function VideoUploadSection() {
                             onClick={() => !type.disabled && setSelectedType(type.id)}
                             className={`
                                 group relative flex flex-col items-start p-4 rounded-2xl border-2 transition-all duration-300
-                                ${type.disabled ? 'opacity-60 cursor-not-allowed border-[#9E7676]/10 bg-neutral-50/50' :
-                                    selectedType === type.id ? 'border-[#815B5B] bg-[#FFF0D6] shadow-md scale-[1.02]' :
-                                        'border-[#594545]/10 bg-white hover:border-[#815B5B]/40 hover:bg-[#FFF8EA] shadow-sm cursor-pointer'}
+                                ${type.disabled ? 'opacity-60 cursor-not-allowed border-vdf-dusty-rose/10 bg-neutral-50/50' :
+                                    selectedType === type.id ? 'border-vdf-warm-mauve bg-vdf-cream-alt shadow-md scale-[1.02]' :
+                                        'border-vdf-deep-brown/10 bg-white hover:border-vdf-warm-mauve/40 hover:bg-vdf-cream shadow-sm cursor-pointer'}
                             `}
                         >
                             <div className="w-full aspect-video rounded-xl overflow-hidden mb-4 bg-neutral-100">
@@ -136,23 +136,23 @@ function VideoUploadSection() {
                                     className={`w-full h-full object-cover transition-transform duration-500 ${!type.disabled && 'group-hover:scale-110'}`}
                                 />
                             </div>
-                            <h3 className={`font-sans text-sm font-bold mb-1 ${selectedType === type.id ? 'text-[#815B5B]' : 'text-[#594545]'}`}>
+                            <h3 className={`font-sans text-sm font-bold mb-1 ${selectedType === type.id ? 'text-vdf-warm-mauve' : 'text-vdf-deep-brown'}`}>
                                 {type.title}
                             </h3>
-                            <p className="text-[11px] leading-relaxed text-[#9E7676]">
+                            <p className="text-[11px] leading-relaxed text-vdf-dusty-rose">
                                 {type.description}
                             </p>
 
                             {type.disabled && (
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/40 backdrop-blur-[1px] rounded-2xl">
-                                    <span className="bg-[#594545] text-[#FFF8EA] px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
+                                    <span className="bg-vdf-deep-brown text-vdf-cream px-3 py-1 rounded-full text-[10px] font-bold shadow-lg">
                                         Coming Soon
                                     </span>
                                 </div>
                             )}
 
                             {!type.disabled && selectedType === type.id && (
-                                <div className="absolute top-2 right-2 bg-[#815B5B] text-white p-1 rounded-full shadow-sm">
+                                <div className="absolute top-2 right-2 bg-vdf-warm-mauve text-white p-1 rounded-full shadow-sm">
                                     <CheckCircle2 className="w-4 h-4" />
                                 </div>
                             )}
@@ -165,21 +165,21 @@ function VideoUploadSection() {
                         className={`
                             relative flex flex-col items-center justify-center w-full h-44 
                             border-2 border-dashed rounded-2xl cursor-pointer transition-all
-                            ${loading ? 'bg-[#FFF8EA]/50 border-[#9E7676]/30 pointer-events-none' : 'bg-[#FFF8EA] border-[#815B5B]/40 hover:border-[#815B5B] hover:bg-[#FFF0D6]'}
+                            ${loading ? 'bg-vdf-cream/50 border-vdf-dusty-rose/30 pointer-events-none' : 'bg-vdf-cream border-vdf-warm-mauve/40 hover:border-vdf-warm-mauve hover:bg-vdf-cream-alt'}
                         `}
                     >
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                             {loading ? (
-                                <Loader2 className="w-10 h-10 text-[#815B5B] animate-spin mb-3" />
+                                <Loader2 className="w-10 h-10 text-vdf-warm-mauve animate-spin mb-3" />
                             ) : isDone ? (
                                 <CheckCircle2 className="w-10 h-10 text-green-600 mb-3" />
                             ) : (
-                                <FileUp className="w-10 h-10 text-[#815B5B] mb-3" />
+                                <FileUp className="w-10 h-10 text-vdf-warm-mauve mb-3" />
                             )}
-                            <p className="mb-2 text-sm text-[#594545]">
+                            <p className="mb-2 text-sm text-vdf-deep-brown">
                                 <span className="font-semibold">Click to upload</span> or drag and drop
                             </p>
-                            <p className="text-xs text-[#9E7676]">MP4, MOV, or WEBM (max 100MB)</p>
+                            <p className="text-xs text-vdf-dusty-rose">MP4, MOV, or WEBM (max 100MB)</p>
                         </div>
                         <input
                             type="file"
@@ -192,8 +192,8 @@ function VideoUploadSection() {
 
                     {status && (
                         <div className="mt-4 flex items-center gap-2 justify-center">
-                            {loading && <Loader2 className="w-4 h-4 text-[#815B5B] animate-spin" />}
-                            <p className={`text-xs font-medium ${isDone ? 'text-green-600' : 'text-[#815B5B]'}`}>
+                            {loading && <Loader2 className="w-4 h-4 text-vdf-warm-mauve animate-spin" />}
+                            <p className={`text-xs font-medium ${isDone ? 'text-green-600' : 'text-vdf-warm-mauve'}`}>
                                 {status}
                             </p>
                         </div>
@@ -201,13 +201,13 @@ function VideoUploadSection() {
                     {/* show progress bar */}
                     {loading && (
                         <div className="mt-4 flex items-center gap-2 justify-center">
-                            <div className="w-full h-2 bg-[#FFF8EA] rounded-full overflow-hidden">
+                            <div className="w-full h-2 bg-vdf-cream rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-[#815B5B] transition-all duration-300"
+                                    className="h-full bg-vdf-warm-mauve transition-all duration-300"
                                     style={{ width: `${progress}%` }}
                                 ></div>
                             </div>
-                            <p className="text-xs font-medium text-[#815B5B]">
+                            <p className="text-xs font-medium text-vdf-warm-mauve">
                                 {progress.toFixed(0)}%
                             </p>
                         </div>
@@ -260,8 +260,8 @@ function VideoContent() {
     }, [url]);
 
     return (
-        <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 text-[#594545]">
-            <div className="w-full max-w-4xl bg-[#FFF0D6] rounded-2xl border-2 border-[#594545] overflow-hidden shadow-xl grain-overlay relative">
+        <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 text-vdf-deep-brown">
+            <div className="w-full max-w-4xl bg-vdf-cream-alt rounded-2xl border-2 border-vdf-deep-brown overflow-hidden shadow-xl grain-overlay relative">
                 <div className="p-8 md:p-12 flex flex-col items-center gap-8 relative z-10">
                     {url ? <>
                         <div className="flex flex-col items-center gap-2 text-center">
@@ -269,7 +269,7 @@ function VideoContent() {
                                 {loading ? "Processing Video..." : "Ready to Download"}
                             </h1>
                             {url && (
-                                <p className="text-[#9E7676] font-sans truncate max-w-md">
+                                <p className="text-vdf-dusty-rose font-sans truncate max-w-md">
                                     {url}
                                 </p>
                             )}
@@ -278,8 +278,8 @@ function VideoContent() {
                         <div className="w-full flex flex-col items-center gap-10">
                             {url && loading && (
                                 <div className="flex flex-col items-center gap-4 py-12">
-                                    <Loader2 className="w-12 h-12 text-[#815B5B] animate-spin" />
-                                    <p className="text-[#815B5B] font-medium font-sans">Fetching metadata and links...</p>
+                                    <Loader2 className="w-12 h-12 text-vdf-warm-mauve animate-spin" />
+                                    <p className="text-vdf-warm-mauve font-medium font-sans">Fetching metadata and links...</p>
                                 </div>
                             )}
 
@@ -289,7 +289,7 @@ function VideoContent() {
                                     <p className="text-red-500 font-bold text-xl font-sans">{error}</p>
                                     <button
                                         onClick={() => window.location.href = '/'}
-                                        className="mt-4 rounded-full bg-[#815B5B] px-8 py-3 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545]"
+                                        className="mt-4 rounded-full bg-vdf-warm-mauve px-8 py-3 font-sans text-sm font-medium text-vdf-cream transition-all hover:bg-vdf-deep-brown"
                                     >
                                         Try Another Link
                                     </button>
@@ -299,14 +299,14 @@ function VideoContent() {
                             {url && data && !loading && (
                                 <div className="w-full flex flex-col md:flex-row gap-10 items-center md:items-start">
                                     {/* Left side: Thumbnail */}
-                                    <div className="w-full md:w-1/2 aspect-video bg-black rounded-xl overflow-hidden shadow-lg border-2 border-[#594545] relative group">
+                                    <div className="w-full md:w-1/2 aspect-video bg-black rounded-xl overflow-hidden shadow-lg border-2 border-vdf-deep-brown relative group">
                                         <img
                                             src={data.thumbnail}
                                             alt={data.title}
                                             className="w-full h-full object-cover opacity-90"
                                         />
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                                            <div className="w-16 h-16 bg-[#815B5B] rounded-full flex items-center justify-center text-white shadow-lg">
+                                            <div className="w-16 h-16 bg-vdf-warm-mauve rounded-full flex items-center justify-center text-white shadow-lg">
                                                 <Play className="w-8 h-8 fill-current translate-x-0.5" />
                                             </div>
                                         </div>
@@ -315,13 +315,13 @@ function VideoContent() {
                                     {/* Right side: Details and Actions */}
                                     <div className="w-full md:w-1/2 flex flex-col gap-6">
                                         <div className="space-y-2">
-                                            <h2 className="text-2xl font-bold text-[#594545] line-clamp-2">
+                                            <h2 className="text-2xl font-bold text-vdf-deep-brown line-clamp-2">
                                                 {data.title}
                                             </h2>
-                                            <div className="h-1 w-20 bg-[#815B5B] rounded-full"></div>
+                                            <div className="h-1 w-20 bg-vdf-warm-mauve rounded-full"></div>
                                         </div>
 
-                                        <p className="text-[#9E7676] text-sm italic">
+                                        <p className="text-vdf-dusty-rose text-sm italic">
                                             Your high-quality download link has been generated and is ready.
                                         </p>
 
@@ -330,7 +330,7 @@ function VideoContent() {
                                                 href={data.previewUrl}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="w-full rounded-full bg-[#815B5B] px-8 py-5 font-sans text-lg font-bold text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-xl flex items-center justify-center gap-3 active:scale-95"
+                                                className="w-full rounded-full bg-vdf-warm-mauve px-8 py-5 font-sans text-lg font-bold text-vdf-cream transition-all hover:bg-vdf-deep-brown hover:shadow-xl flex items-center justify-center gap-3 active:scale-95"
                                             >
                                                 <Download className="w-6 h-6" />
                                                 Download Video
@@ -338,7 +338,7 @@ function VideoContent() {
 
                                             <button
                                                 onClick={() => window.location.href = '/'}
-                                                className="w-full rounded-full border-2 border-[#815B5B] px-8 py-4 font-sans text-sm font-medium text-[#815B5B] transition-all hover:bg-[#815B5B] hover:text-[#FFF8EA] text-center"
+                                                className="w-full rounded-full border-2 border-vdf-warm-mauve px-8 py-4 font-sans text-sm font-medium text-vdf-warm-mauve transition-all hover:bg-vdf-warm-mauve hover:text-vdf-cream text-center"
                                             >
                                                 Extract Another
                                             </button>
@@ -361,11 +361,11 @@ function VideoContent() {
 
 export default function VideoPage() {
     return (
-        <div className="bg-[#FFF8EA] flex flex-col">
+        <div className="bg-vdf-cream flex flex-col">
             <VDFHeader fixed={false} />
             <Suspense fallback={
                 <div className="flex-1 flex items-center justify-center">
-                    <Loader2 className="w-12 h-12 text-[#815B5B] animate-spin" />
+                    <Loader2 className="w-12 h-12 text-vdf-warm-mauve animate-spin" />
                 </div>
             }>
                 <VideoContent />

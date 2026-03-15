@@ -92,7 +92,7 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="overflow-hidden rounded-lg bg-[#FFF8EA] shadow-sm">
+              <div key={i} className="overflow-hidden rounded-lg bg-vdf-cream shadow-sm">
                 <div className="shimmer aspect-video w-full" />
                 <div className="p-4 flex flex-col gap-3">
                   <div className="shimmer h-4 w-20 rounded" />
@@ -119,35 +119,32 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
               <button
                 key={f}
                 onClick={() => setActiveFilter(f)}
-                className={`rounded-full px-4 py-1.5 font-sans text-xs font-medium transition-colors ${
-                  activeFilter === f
-                    ? "bg-[#594545] text-[#FFF8EA]"
-                    : "bg-[#FFF8EA] text-[#9E7676] border border-[#9E7676]/20 hover:bg-[#FFF0D6]"
-                }`}
+                className={`rounded-full px-4 py-1.5 font-sans text-xs font-medium transition-colors ${activeFilter === f
+                  ? "bg-vdf-deep-brown text-vdf-cream"
+                  : "bg-vdf-cream text-vdf-dusty-rose border border-vdf-dusty-rose/20 hover:bg-vdf-cream-alt"
+                  }`}
               >
                 {f}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-[#9E7676]/20 p-0.5">
+          <div className="flex items-center gap-2 rounded-full border border-vdf-dusty-rose/20 p-0.5">
             <button
               onClick={() => setViewMode("free")}
-              className={`rounded-full px-3 py-1 font-sans text-xs font-medium transition-colors ${
-                viewMode === "free"
-                  ? "bg-[#594545] text-[#FFF8EA]"
-                  : "text-[#9E7676] hover:text-[#594545]"
-              }`}
+              className={`rounded-full px-3 py-1 font-sans text-xs font-medium transition-colors ${viewMode === "free"
+                ? "bg-vdf-deep-brown text-vdf-cream"
+                : "text-vdf-dusty-rose hover:text-vdf-deep-brown"
+                }`}
             >
               Free
             </button>
             <button
               onClick={() => setViewMode("premium")}
-              className={`rounded-full px-3 py-1 font-sans text-xs font-medium transition-colors ${
-                viewMode === "premium"
-                  ? "bg-[#815B5B] text-[#FFF8EA]"
-                  : "text-[#9E7676] hover:text-[#594545]"
-              }`}
+              className={`rounded-full px-3 py-1 font-sans text-xs font-medium transition-colors ${viewMode === "premium"
+                ? "bg-vdf-warm-mauve text-vdf-cream"
+                : "text-vdf-dusty-rose hover:text-vdf-deep-brown"
+                }`}
             >
               Premium
             </button>
@@ -159,7 +156,7 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
           {frames.map((frame) => (
             <div
               key={frame.frameId}
-              className="overflow-hidden rounded-lg bg-[#FFF8EA] shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
+              className="overflow-hidden rounded-lg bg-vdf-cream shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
             >
               {/* Image with timestamp */}
               <div className="relative">
@@ -168,7 +165,7 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
                   alt={`Frame at ${frame.timestamp}`}
                   className="aspect-video w-full object-cover"
                 />
-                <span className="absolute right-2 top-2 rounded-md bg-[#594545] px-2 py-0.5 font-sans text-xs font-medium text-[#FFF8EA]">
+                <span className="absolute right-2 top-2 rounded-md bg-vdf-deep-brown px-2 py-0.5 font-sans text-xs font-medium text-vdf-cream">
                   {frame.timestamp}
                 </span>
               </div>
@@ -179,16 +176,16 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
                   /* Freemium: blurred/locked explanation */
                   <button
                     onClick={() => setShowUpgradeModal(true)}
-                    className="group flex w-full items-center gap-2 rounded-md bg-[#9E7676]/5 p-3 transition-colors hover:bg-[#9E7676]/10"
+                    className="group flex w-full items-center gap-2 rounded-md bg-vdf-dusty-rose/5 p-3 transition-colors hover:bg-vdf-dusty-rose/10"
                   >
                     <div className="relative flex-1">
-                      <p className="select-none font-sans text-xs text-[#9E7676]/40 blur-[3px]">
+                      <p className="select-none font-sans text-xs text-vdf-dusty-rose/40 blur-[3px]">
                         This frame explains the core concept being demonstrated in the lecture with detailed breakdown of steps.
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <Lock className="h-3.5 w-3.5 text-[#9E7676]" />
-                      <span className="font-sans text-xs text-[#9E7676] group-hover:text-[#815B5B]">
+                      <Lock className="h-3.5 w-3.5 text-vdf-dusty-rose" />
+                      <span className="font-sans text-xs text-vdf-dusty-rose group-hover:text-vdf-warm-mauve">
                         Unlock
                       </span>
                     </div>
@@ -198,17 +195,16 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
                   <div>
                     <button
                       onClick={() => toggleAccordion(frame.frameId)}
-                      className="flex w-full items-center justify-between py-1 font-sans text-sm font-medium text-[#594545] transition-colors hover:text-[#815B5B]"
+                      className="flex w-full items-center justify-between py-1 font-sans text-sm font-medium text-vdf-deep-brown transition-colors hover:text-vdf-warm-mauve"
                     >
                       Breakdown
                       <ChevronDown
-                        className={`h-4 w-4 text-[#9E7676] transition-transform ${
-                          expandedCards.has(frame.frameId) ? "rotate-180" : ""
-                        }`}
+                        className={`h-4 w-4 text-vdf-dusty-rose transition-transform ${expandedCards.has(frame.frameId) ? "rotate-180" : ""
+                          }`}
                       />
                     </button>
                     {expandedCards.has(frame.frameId) && (
-                      <div className="mt-2 border-t border-[#9E7676]/10 pt-3">
+                      <div className="mt-2 border-t border-vdf-dusty-rose/10 pt-3">
                         {loadingExplanations.has(frame.frameId) ? (
                           <div className="flex flex-col gap-2">
                             <div className="shimmer h-3 w-full rounded" />
@@ -216,14 +212,14 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
                           </div>
                         ) : (
                           <>
-                            <p className="font-sans text-xs leading-relaxed text-[#815B5B]">
+                            <p className="font-sans text-xs leading-relaxed text-vdf-warm-mauve">
                               {explanations[frame.frameId]}
                             </p>
                             <div className="mt-3 flex items-center gap-1">
-                              <svg className="h-3 w-3 text-[#9E7676]/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                              <svg className="h-3 w-3 text-vdf-dusty-rose/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                               </svg>
-                              <span className="font-sans text-[10px] text-[#9E7676]/40">gemini</span>
+                              <span className="font-sans text-[10px] text-vdf-dusty-rose/40">gemini</span>
                             </div>
                           </>
                         )}
@@ -239,25 +235,25 @@ export default function VDFDashboard({ frames, isLoading }: VDFDashboardProps) {
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#594545]/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-xl bg-[#FFF8EA] p-8 shadow-xl">
-            <h3 className="font-serif text-2xl font-bold text-[#594545]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-vdf-deep-brown/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-xl bg-vdf-cream p-8 shadow-xl">
+            <h3 className="font-serif text-2xl font-bold text-vdf-deep-brown">
               Unlock explanations
             </h3>
-            <p className="mt-3 font-sans text-sm leading-relaxed text-[#815B5B]">
+            <p className="mt-3 font-sans text-sm leading-relaxed text-vdf-warm-mauve">
               Upgrade to Scholar to get detailed breakdowns of every frame extracted from your videos.
             </p>
             <div className="mt-6 flex flex-col gap-3">
               <a
                 href="#pricing"
                 onClick={() => setShowUpgradeModal(false)}
-                className="block w-full rounded-full bg-[#815B5B] px-6 py-3 text-center font-sans text-sm font-medium text-[#FFF8EA] transition-colors hover:bg-[#594545]"
+                className="block w-full rounded-full bg-vdf-warm-mauve px-6 py-3 text-center font-sans text-sm font-medium text-vdf-cream transition-colors hover:bg-vdf-deep-brown"
               >
                 {"View plans \u2192"}
               </a>
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="w-full rounded-full px-6 py-3 font-sans text-sm text-[#9E7676] transition-colors hover:text-[#594545]"
+                className="w-full rounded-full px-6 py-3 font-sans text-sm text-vdf-dusty-rose transition-colors hover:text-vdf-deep-brown"
               >
                 Maybe later
               </button>

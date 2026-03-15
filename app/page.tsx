@@ -7,7 +7,7 @@ import VDFFooter from "@/components/vdf-footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#FFF8EA]">
+    <div className="min-h-screen bg-vdf-cream">
       <VDFHeader />
       <main>
         <VDFHero />

@@ -11,11 +11,11 @@ async function ErrorContent({
   return (
     <>
       {params?.error ? (
-        <p className="font-sans text-sm text-[#815B5B] leading-relaxed">
+        <p className="font-sans text-sm text-vdf-warm-mauve leading-relaxed">
           Code error: {params.error}
         </p>
       ) : (
-        <p className="font-sans text-sm text-[#815B5B] leading-relaxed">
+        <p className="font-sans text-sm text-vdf-warm-mauve leading-relaxed">
           An unspecified error occurred.
         </p>
       )}
@@ -29,8 +29,8 @@ export default function Page({
   searchParams: Promise<{ error: string }>;
 }) {
   return (
-    <div className="flex min-h-svh w-full flex-col bg-[#FFF8EA]">
-      <header className="w-full border-b border-[#9E7676]/15 bg-[#FFF8EA]/90 backdrop-blur-md px-6 py-4">
+    <div className="flex min-h-svh w-full flex-col bg-vdf-cream">
+      <header className="w-full border-b border-vdf-dusty-rose/15 bg-vdf-cream/90 backdrop-blur-md px-6 py-4">
         <div className="mx-auto max-w-7xl">
           <Link href="/">
             <img src="/vdf-logo.png" alt="Logo" className="h-8" />
@@ -39,9 +39,9 @@ export default function Page({
       </header>
       <div className="flex flex-1 items-center justify-center p-6 md:p-10">
         <div className="w-full max-w-sm">
-          <div className="rounded-xl border border-[#9E7676]/15 bg-[#FFF8EA] p-8 shadow-[0_2px_8px_rgba(89,69,69,0.08)]">
+          <div className="rounded-xl border border-vdf-dusty-rose/15 bg-vdf-cream p-8 shadow-[0_2px_8px_rgba(89,69,69,0.08)]">
             <div className="mb-4">
-              <h2 className="font-serif text-2xl font-bold text-[#594545]">
+              <h2 className="font-serif text-2xl font-bold text-vdf-deep-brown">
                 Sorry, something went wrong.
               </h2>
             </div>
@@ -51,7 +51,7 @@ export default function Page({
             <div className="mt-6">
               <Link
                 href="/auth/login"
-                className="block w-full rounded-full bg-[#815B5B] px-6 py-3 text-center font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-lg"
+                className="block w-full rounded-full bg-vdf-warm-mauve px-6 py-3 text-center font-sans text-sm font-medium text-vdf-cream transition-all hover:bg-vdf-deep-brown hover:shadow-lg"
               >
                 Back to Login
               </Link>

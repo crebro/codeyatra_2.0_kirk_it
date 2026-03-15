@@ -55,6 +55,13 @@ export default {
           "4": "hsl(var(--chart-4))",
           "5": "hsl(var(--chart-5))",
         },
+        vdf: {
+          cream: "var(--vdf-cream)",
+          "cream-alt": "var(--vdf-cream-alt)",
+          "dusty-rose": "var(--vdf-dusty-rose)",
+          "warm-mauve": "var(--vdf-warm-mauve)",
+          "deep-brown": "var(--vdf-deep-brown)",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

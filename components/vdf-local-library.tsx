@@ -95,10 +95,10 @@ export function VDFLocalLibrary() {
   return (
     <div className="w-full min-h-[60vh]">
       <div className="mb-10 flex items-center justify-between">
-        <h2 className="font-serif text-3xl font-bold text-[#594545]">
+        <h2 className="font-serif text-3xl font-bold text-vdf-deep-brown">
           Your Library
         </h2>
-        <div className="flex items-center gap-2 bg-[#815B5B] text-[#FFF8EA] px-4 py-1.5 rounded-full text-sm font-medium shadow-md">
+        <div className="flex items-center gap-2 bg-vdf-warm-mauve text-vdf-cream px-4 py-1.5 rounded-full text-sm font-medium shadow-md">
           <FileVideo className="w-4 h-4" />
           <span>{videos.length} extractions</span>
         </div>
@@ -107,25 +107,25 @@ export function VDFLocalLibrary() {
       {loading ? (
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="bg-[#FFF0D6]/40 rounded-2xl p-4 animate-pulse">
-              <div className="aspect-video bg-[#9E7676]/10 rounded-xl mb-4" />
-              <div className="h-5 bg-[#9E7676]/10 rounded-full w-3/4 mb-2" />
-              <div className="h-4 bg-[#9E7676]/10 rounded-full w-1/2" />
+            <div key={i} className="bg-vdf-cream-alt/40 rounded-2xl p-4 animate-pulse">
+              <div className="aspect-video bg-vdf-dusty-rose/10 rounded-xl mb-4" />
+              <div className="h-5 bg-vdf-dusty-rose/10 rounded-full w-3/4 mb-2" />
+              <div className="h-4 bg-vdf-dusty-rose/10 rounded-full w-1/2" />
             </div>
           ))}
         </div>
       ) : videos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 px-6 text-center border-2 border-dashed border-[#9E7676]/30 rounded-3xl bg-[#FFF0D6]/20">
-          <div className="bg-[#9E7676]/10 p-6 rounded-full mb-6">
-            <FileVideo className="w-12 h-12 text-[#9E7676]" />
+        <div className="flex flex-col items-center justify-center py-24 px-6 text-center border-2 border-dashed border-vdf-dusty-rose/30 rounded-3xl bg-vdf-cream-alt/20">
+          <div className="bg-vdf-dusty-rose/10 p-6 rounded-full mb-6">
+            <FileVideo className="w-12 h-12 text-vdf-dusty-rose" />
           </div>
-          <h3 className="text-xl font-bold text-[#594545] mb-2">Empty Library</h3>
-          <p className="text-[#9E7676] max-w-sm mb-8">
+          <h3 className="text-xl font-bold text-vdf-deep-brown mb-2">Empty Library</h3>
+          <p className="text-vdf-dusty-rose max-w-sm mb-8">
             You haven&apos;t extracted any frames yet. Upload a video on the home page to get started.
           </p>
-          <button 
+          <button
             onClick={() => router.push("/")}
-            className="bg-[#815B5B] text-white px-8 py-3 rounded-full font-bold hover:bg-[#594545] transition-all shadow-lg active:scale-95"
+            className="bg-vdf-warm-mauve text-white px-8 py-3 rounded-full font-bold hover:bg-vdf-deep-brown transition-all shadow-lg active:scale-95"
           >
             Start Extraction
           </button>
@@ -139,7 +139,7 @@ export function VDFLocalLibrary() {
               className="group cursor-pointer bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               {/* Thumbnail */}
-              <div className="relative aspect-video bg-[#594545]">
+              <div className="relative aspect-video bg-vdf-deep-brown">
                 {thumbnails[video.id] ? (
                   <img
                     src={thumbnails[video.id]}
@@ -148,7 +148,7 @@ export function VDFLocalLibrary() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <FileVideo className="w-12 h-12 text-[#FFF8EA]/20" />
+                    <FileVideo className="w-12 h-12 text-vdf-cream/20" />
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
@@ -164,7 +164,7 @@ export function VDFLocalLibrary() {
                     <input
                       autoFocus
                       type="text"
-                      className="flex-1 bg-[#FFF8EA] border-2 border-[#815B5B]/30 rounded-lg px-3 py-1 text-sm font-medium text-[#594545] focus:outline-none focus:border-[#815B5B]"
+                      className="flex-1 bg-vdf-cream border-2 border-vdf-warm-mauve/30 rounded-lg px-3 py-1 text-sm font-medium text-vdf-deep-brown focus:outline-none focus:border-vdf-warm-mauve"
                       value={renameValue}
                       onChange={e => setRenameValue(e.target.value)}
                       onKeyDown={e => {
@@ -172,28 +172,28 @@ export function VDFLocalLibrary() {
                         if (e.key === 'Escape') setRenamingId(null);
                       }}
                     />
-                    <button 
+                    <button
                       disabled={submitting}
                       onClick={e => saveRename(video.id, e)}
-                      className="p-1.5 bg-[#815B5B] text-white rounded-lg hover:bg-[#594545] disabled:opacity-50"
+                      className="p-1.5 bg-vdf-warm-mauve text-white rounded-lg hover:bg-vdf-deep-brown disabled:opacity-50"
                     >
                       {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-serif text-lg font-bold text-[#594545] truncate group-hover:text-[#815B5B] transition-colors">
+                    <h3 className="font-serif text-lg font-bold text-vdf-deep-brown truncate group-hover:text-vdf-warm-mauve transition-colors">
                       {video.title || "Untitled Extraction"}
                     </h3>
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
+                      <button
                         onClick={e => startRename(video, e)}
-                        className="p-1.5 text-[#9E7676] hover:bg-[#FFF8EA] rounded-full"
+                        className="p-1.5 text-vdf-dusty-rose hover:bg-vdf-cream rounded-full"
                         title="Rename"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={e => handleDelete(video.id, e)}
                         className="p-1.5 text-red-400 hover:bg-red-50 rounded-full"
                         title="Delete"
@@ -204,12 +204,12 @@ export function VDFLocalLibrary() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 text-[#9E7676] text-xs font-medium">
+                <div className="flex items-center gap-4 text-vdf-dusty-rose text-xs font-medium">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>{new Date(video.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 ml-auto text-[#815B5B]">
+                  <div className="flex items-center gap-1.5 ml-auto text-vdf-warm-mauve">
                     <span>View Frames</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </div>

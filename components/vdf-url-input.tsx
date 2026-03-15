@@ -49,8 +49,8 @@ export function VDFUrlInput() {
       }
       const { data, error } = await supabase
         .from("video_urls")
-        .insert({ 
-          url: youtubeUrl.trim(), 
+        .insert({
+          url: youtubeUrl.trim(),
           user_id: user.id,
         }).select().single();
 
@@ -80,13 +80,13 @@ export function VDFUrlInput() {
   return (
     <div className="flex flex-1 flex-col w-full">
       {/* Input hero — fills available space, centers content vertically */}
-      <section className="grain-overlay relative flex flex-1 items-center justify-center w-full bg-[#FFF0D6] px-6 py-16 md:px-12">
+      <section className="grain-overlay relative flex flex-1 items-center justify-center w-full bg-vdf-cream-alt px-6 py-16 md:px-12">
         <div className="relative z-10 mx-auto w-full max-w-xl flex flex-col items-center gap-8">
           <div className="flex flex-col items-center gap-2">
-            <h1 className="font-serif text-3xl font-bold text-[#594545] md:text-4xl text-center">
+            <h1 className="font-serif text-3xl font-bold text-vdf-deep-brown md:text-4xl text-center">
               Extract Key Frames
             </h1>
-            <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-[#9E7676]">
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-vdf-dusty-rose">
               Paste your YouTube link below
             </p>
           </div>
@@ -100,12 +100,12 @@ export function VDFUrlInput() {
                 if (e.key === "Enter") handleSaveUrl();
               }}
               placeholder="youtube.com/watch?v=..."
-              className="w-full rounded-lg border-[1.5px] border-[#594545] bg-[#FFF8EA] px-5 py-4 font-sans text-base text-[#594545] placeholder:text-[#9E7676]/60 transition-colors focus:border-[#815B5B] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
+              className="w-full rounded-lg border-[1.5px] border-vdf-deep-brown bg-vdf-cream px-5 py-4 font-sans text-base text-vdf-deep-brown placeholder:text-vdf-dusty-rose/60 transition-colors focus:border-vdf-warm-mauve focus:outline-none focus:ring-2 focus:ring-vdf-warm-mauve/20"
             />
             <button
               onClick={handleSaveUrl}
               disabled={saving}
-              className="w-full rounded-full bg-[#815B5B] px-8 py-4 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#815B5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF0D6] disabled:opacity-60"
+              className="w-full rounded-full bg-vdf-warm-mauve px-8 py-4 font-sans text-sm font-medium text-vdf-cream transition-all hover:bg-vdf-deep-brown hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vdf-warm-mauve focus-visible:ring-offset-2 focus-visible:ring-offset-vdf-cream-alt disabled:opacity-60"
             >
               {saving ? "Saving..." : "Extract Frames"}
             </button>
@@ -123,7 +123,7 @@ export function VDFUrlInput() {
             </p>
           )}
 
-          <p className="font-sans text-xs text-[#9E7676]">
+          <p className="font-sans text-xs text-vdf-dusty-rose">
             Works with any public YouTube video.
           </p>
         </div>

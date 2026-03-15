@@ -40,7 +40,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable} bg-[#FFF8EA]`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${playfair.variable} bg-vdf-cream`} suppressHydrationWarning>
       <body className="font-sans antialiased">
         {children}
       </body>

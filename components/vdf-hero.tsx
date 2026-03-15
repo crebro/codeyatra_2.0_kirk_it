@@ -27,25 +27,25 @@ export default function VDFHero() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8 items-start">
           {/* Left column */}
           <div className="lg:col-span-6 flex flex-col gap-8">
-            <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-[#9E7676]">
+            <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-vdf-dusty-rose">
               Study differently
             </p>
 
-            <h1 className="font-serif text-5xl font-bold leading-[1.1] text-[#594545] md:text-6xl lg:text-7xl" style={{ textWrap: "balance" }}>
+            <h1 className="font-serif text-5xl font-bold leading-[1.1] text-vdf-deep-brown md:text-6xl lg:text-7xl" style={{ textWrap: "balance" }}>
               Study Different.
               <br />
               Study <span className="text-black"> Better. </span>
-              <br/>
+              <br />
             </h1>
 
-            <p className="max-w-md font-sans text-lg leading-relaxed text-[#815B5B]">
+            <p className="max-w-md font-sans text-lg leading-relaxed text-vdf-warm-mauve">
               Turn lectures and tutorials into visual study guides.
             </p>
 
             <div>
               <button
                 onClick={handleCTAClick}
-                className="inline-flex items-center gap-2 rounded-full bg-[#594545] px-8 py-3.5 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#815B5B] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#815B5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF8EA]"
+                className="inline-flex items-center gap-2 rounded-full bg-vdf-deep-brown px-8 py-3.5 font-sans text-sm font-medium text-vdf-cream transition-all hover:bg-vdf-warm-mauve hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vdf-warm-mauve focus-visible:ring-offset-2 focus-visible:ring-offset-vdf-cream"
               >
                 {"Start Learning \u2192"}
               </button>
@@ -69,7 +69,7 @@ export default function VDFHero() {
                     alt="Math lecture frame"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[#9E7676]/20 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-vdf-dusty-rose/20 mix-blend-multiply" />
                 </div>
               </div>
 
@@ -81,7 +81,7 @@ export default function VDFHero() {
                     alt="Biology lecture frame"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[#9E7676]/15 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-vdf-dusty-rose/15 mix-blend-multiply" />
                 </div>
               </div>
 
@@ -93,7 +93,7 @@ export default function VDFHero() {
                     alt="Physics lecture frame"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[#9E7676]/25 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-vdf-dusty-rose/25 mix-blend-multiply" />
                 </div>
               </div>
 
@@ -105,7 +105,7 @@ export default function VDFHero() {
                     alt="Coding tutorial frame"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[#9E7676]/20 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-vdf-dusty-rose/20 mix-blend-multiply" />
                 </div>
               </div>
 
@@ -117,7 +117,7 @@ export default function VDFHero() {
                     alt="Chemistry lecture frame"
                     className="h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[#9E7676]/15 mix-blend-multiply" />
+                  <div className="absolute inset-0 bg-vdf-dusty-rose/15 mix-blend-multiply" />
                 </div>
               </div>
 
@@ -129,25 +129,25 @@ export default function VDFHero() {
             <div className="aspect-[4/5] overflow-hidden rounded-lg shadow-md">
               <div className="relative h-full w-full">
                 <img src="/study-tile-1.jpg" alt="Math lecture frame" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-[#9E7676]/20 mix-blend-multiply" />
+                <div className="absolute inset-0 bg-vdf-dusty-rose/20 mix-blend-multiply" />
               </div>
             </div>
             <div className="aspect-square overflow-hidden rounded-lg shadow-md">
               <div className="relative h-full w-full">
                 <img src="/study-tile-3.jpg" alt="Biology lecture frame" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-[#9E7676]/15 mix-blend-multiply" />
+                <div className="absolute inset-0 bg-vdf-dusty-rose/15 mix-blend-multiply" />
               </div>
             </div>
             <div className="aspect-square overflow-hidden rounded-lg shadow-md">
               <div className="relative h-full w-full">
                 <img src="/study-tile-4.jpg" alt="Physics lecture frame" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-[#9E7676]/25 mix-blend-multiply" />
+                <div className="absolute inset-0 bg-vdf-dusty-rose/25 mix-blend-multiply" />
               </div>
             </div>
             <div className="aspect-[4/5] overflow-hidden rounded-lg shadow-md">
               <div className="relative h-full w-full">
                 <img src="/study-tile-2.jpg" alt="Coding tutorial frame" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-[#9E7676]/20 mix-blend-multiply" />
+                <div className="absolute inset-0 bg-vdf-dusty-rose/20 mix-blend-multiply" />
               </div>
             </div>
           </div>

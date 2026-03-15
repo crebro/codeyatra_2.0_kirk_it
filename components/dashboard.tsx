@@ -189,9 +189,9 @@ export function Dashboard() {
   return (
     <div className="w-full">
       {/* URL Input Section */}
-      <section className="grain-overlay relative w-full bg-[#FFF0D6] px-6 py-20 md:px-12 md:py-28">
+      <section className="grain-overlay relative w-full bg-vdf-cream-alt px-6 py-20 md:px-12 md:py-28">
         <div className="relative z-10 mx-auto max-w-xl flex flex-col items-center gap-6">
-          <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-[#9E7676]">
+          <p className="text-xs font-sans font-medium uppercase tracking-[0.2em] text-vdf-dusty-rose">
             Paste your link
           </p>
 
@@ -204,12 +204,12 @@ export function Dashboard() {
                 if (e.key === "Enter") handleSaveUrl();
               }}
               placeholder="youtube.com/watch?v=..."
-              className="w-full rounded-lg border-[1.5px] border-[#594545] bg-[#FFF8EA] px-5 py-4 font-sans text-base text-[#594545] placeholder:text-[#9E7676]/60 transition-colors focus:border-[#815B5B] focus:outline-none focus:ring-2 focus:ring-[#815B5B]/20"
+              className="w-full rounded-lg border-[1.5px] border-vdf-deep-brown bg-vdf-cream px-5 py-4 font-sans text-base text-vdf-deep-brown placeholder:text-vdf-dusty-rose/60 transition-colors focus:border-vdf-warm-mauve focus:outline-none focus:ring-2 focus:ring-vdf-warm-mauve/20"
             />
             <button
               onClick={handleSaveUrl}
               disabled={saving}
-              className="w-full rounded-full bg-[#815B5B] px-8 py-4 font-sans text-sm font-medium text-[#FFF8EA] transition-all hover:bg-[#594545] hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#815B5B] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FFF0D6] disabled:opacity-60"
+              className="w-full rounded-full bg-vdf-warm-mauve px-8 py-4 font-sans text-sm font-medium text-vdf-cream transition-all hover:bg-vdf-deep-brown hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vdf-warm-mauve focus-visible:ring-offset-2 focus-visible:ring-offset-vdf-cream-alt disabled:opacity-60"
             >
               {saving ? "Saving..." : "Extract Frames"}
             </button>
@@ -227,7 +227,7 @@ export function Dashboard() {
             </p>
           )}
 
-          <p className="font-sans text-xs text-[#9E7676]">
+          <p className="font-sans text-xs text-vdf-dusty-rose">
             Works with any public YouTube video.
           </p>
         </div>
@@ -237,10 +237,10 @@ export function Dashboard() {
       <section className="grain-overlay relative w-full px-6 py-16 md:px-12 md:py-24">
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="mb-10 flex items-center justify-between">
-            <h2 className="font-serif text-2xl font-bold text-[#594545] md:text-3xl">
+            <h2 className="font-serif text-2xl font-bold text-vdf-deep-brown md:text-3xl">
               Your Videos
             </h2>
-            <span className="rounded-full bg-[#594545] px-3 py-1 font-sans text-xs font-medium text-[#FFF8EA]">
+            <span className="rounded-full bg-vdf-deep-brown px-3 py-1 font-sans text-xs font-medium text-vdf-cream">
               {videos.length} video{videos.length !== 1 ? "s" : ""}
             </span>
           </div>
@@ -248,7 +248,7 @@ export function Dashboard() {
           {loadingVideos ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="overflow-hidden rounded-lg bg-[#FFF8EA] shadow-sm">
+                <div key={i} className="overflow-hidden rounded-lg bg-vdf-cream shadow-sm">
                   <div className="shimmer aspect-video w-full" />
                   <div className="p-4 flex flex-col gap-3">
                     <div className="shimmer h-4 w-20 rounded" />
@@ -260,12 +260,12 @@ export function Dashboard() {
             </div>
           ) : videos.length === 0 ? (
             <div className="flex flex-col items-center gap-4 py-16">
-              <div className="rounded-full bg-[#9E7676]/10 p-6">
-                <svg className="h-10 w-10 text-[#9E7676]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <div className="rounded-full bg-vdf-dusty-rose/10 p-6">
+                <svg className="h-10 w-10 text-vdf-dusty-rose" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
               </div>
-              <p className="font-sans text-sm text-[#9E7676]">
+              <p className="font-sans text-sm text-vdf-dusty-rose">
                 No videos yet. Paste a YouTube URL above to get started.
               </p>
             </div>
@@ -282,7 +282,7 @@ export function Dashboard() {
                   <button
                     key={video.id}
                     onClick={() => handleSelectVideo(video)}
-                    className="group overflow-hidden rounded-lg bg-[#FFF8EA] text-left shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
+                    className="group overflow-hidden rounded-lg bg-vdf-cream text-left shadow-[0_2px_8px_rgba(89,69,69,0.08)] transition-shadow hover:shadow-[0_4px_16px_rgba(89,69,69,0.12)]"
                   >
                     {/* Thumbnail */}
                     <div className="relative">
@@ -297,14 +297,14 @@ export function Dashboard() {
                           }}
                         />
                       ) : (
-                        <div className="aspect-video w-full bg-[#9E7676]/10 flex items-center justify-center">
-                          <svg className="h-12 w-12 text-[#9E7676]/30" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                        <div className="aspect-video w-full bg-vdf-dusty-rose/10 flex items-center justify-center">
+                          <svg className="h-12 w-12 text-vdf-dusty-rose/30" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
                           </svg>
                         </div>
                       )}
                       {frameCounts[video.id] !== undefined && (
-                        <span className="absolute right-2 top-2 rounded-md bg-[#594545] px-2 py-0.5 font-sans text-xs font-medium text-[#FFF8EA]">
+                        <span className="absolute right-2 top-2 rounded-md bg-vdf-deep-brown px-2 py-0.5 font-sans text-xs font-medium text-vdf-cream">
                           {frameCounts[video.id]} frame{frameCounts[video.id] !== 1 ? "s" : ""}
                         </span>
                       )}
@@ -312,13 +312,13 @@ export function Dashboard() {
 
                     {/* Content */}
                     <div className="p-4">
-                      <p className="font-sans text-sm font-medium text-[#594545] truncate group-hover:text-[#815B5B] transition-colors">
+                      <p className="font-sans text-sm font-medium text-vdf-deep-brown truncate group-hover:text-vdf-warm-mauve transition-colors">
                         {title}
                       </p>
-                      <p className="mt-1 font-sans text-xs text-[#9E7676] truncate">
+                      <p className="mt-1 font-sans text-xs text-vdf-dusty-rose truncate">
                         {video.url}
                       </p>
-                      <p className="mt-2 font-sans text-xs text-[#9E7676]/60">
+                      <p className="mt-2 font-sans text-xs text-vdf-dusty-rose/60">
                         {new Date(video.created_at).toLocaleDateString()}
                       </p>
                     </div>
