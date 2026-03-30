@@ -1,12 +1,11 @@
 import type { FFmpeg } from "@ffmpeg/ffmpeg";
-import imageToRGBA from "./rgba-standardization";
-import rmsDiff from "./rms-diffs";
+import { parseSSIM } from "./comparison-utils";
 import { imagesToOriginalSizePdf } from "./load-image-from-blob";
 
 const getMetadata = (inputFile: string, ffmpeg: FFmpeg): Promise<string> => {
     return new Promise((resolve) => {
         let log = '';
-        let metadataLogger = ({ message }: { message: string }) => {
+        const metadataLogger = ({ message }: { message: string }) => {
             log += message;
             if (message.indexOf('Aborted()') > -1) {
                 ffmpeg.off('log', metadataLogger);
@@ -19,9 +18,9 @@ const getMetadata = (inputFile: string, ffmpeg: FFmpeg): Promise<string> => {
 };
 
 export const getDuration = async (inputFile: string, ffmpeg: FFmpeg) => {
-    var metadata = await getMetadata(inputFile, ffmpeg);
-    var patt = /Duration:\s*([0-9]{2}):([0-9]{2}):([0-9]{2}.[0-9]{0,2})/gm
-    let m = patt.exec(metadata);
+    const metadata = await getMetadata(inputFile, ffmpeg);
+    const patt = /Duration:\s*([0-9]{2}):([0-9]{2}):([0-9]{2}.[0-9]{0,2})/gm
+    const m = patt.exec(metadata);
 
     if (!m) return 0;
 
@@ -39,12 +38,12 @@ export interface ExtractedFrame {
 }
 
 export const extractFrames = async (
-    inputFile: string, 
-    ffmpeg: FFmpeg, 
-    logCallback: (message: { message: string }) => void, 
+    inputFile: string,
+    ffmpeg: FFmpeg,
+    logCallback: (message: { message: string }) => void,
     progressCallback: (progress: number) => void
 ): Promise<ExtractedFrame[]> => {
-    let duration = await getDuration(inputFile, ffmpeg);
+    const duration = await getDuration(inputFile, ffmpeg);
 
     ffmpeg.on('log', (message: { message: string }) => {
         logCallback(message);
@@ -59,49 +58,88 @@ export const extractFrames = async (
         }
     });
 
-    // Extract one frame every 10 seconds
+
+    const interval = 5;
+
+    // Extract one frame every (interval) seconds
     await ffmpeg.exec([
         '-i', inputFile,
-        '-vf', `fps=1/10`, 
+        '-vf', `fps=1/${interval}`,
         'output_%04d.png'
     ]);
 
-    let extractedFrames: ExtractedFrame[] = [];
-    let uint8Store: Uint8Array | null = null;
-    const interval = 10;
+    const extractedFrames: ExtractedFrame[] = [];
+    let isLastFrameExtracted = false;
+    const nFrames = Math.floor(duration / interval);
 
-    for (let i = 1; i <= Math.floor(duration / interval); i++) {
-        console.log(`Processing frame ${i}`);
+    let pastFilename: string | undefined;
+
+    for (let i = 1; i <= nFrames; i++) {
+        // console.log(`Processing frame ${i}`);
         try {
             const fileName = `output_${i.toString().padStart(4, '0')}.png`;
+
+            if (!pastFilename) {
+                pastFilename = fileName;
+            }
+
+            await ffmpeg.exec([
+                '-i', fileName,
+                '-i', pastFilename,
+                '-lavfi', 'ssim=stats_file=ssim.txt',
+                '-f', 'null',
+                '-'
+            ]);
+
+            const stats = await ffmpeg.readFile('ssim.txt');
+
+            const decoded = new TextDecoder().decode(new Uint8Array(stats as unknown as ArrayBuffer));
+
+            const sim = parseSSIM(decoded);
+
+            if (sim < 0.90) {
+                const data = await ffmpeg.readFile(pastFilename);
+                // @ts-expect-error
+                const buffer = data.buffer;
+
+                const loadedUint8 = new Uint8Array(buffer);
+
+                extractedFrames.push({
+                    blob: new Blob([loadedUint8] , { type: 'image/png' }),
+                    timestamp: (i - 1) * interval,
+                    index: i
+                });
+
+                if (i === nFrames) {
+                    isLastFrameExtracted = true;
+                }
+
+                pastFilename = fileName;
+            }
+        } catch (e) {
+            console.log(`Error reading file output_${i.toString().padStart(4, '0')}.png: ${e}`);
+            break;
+        }
+    }
+
+    // add last frame to extracted frames, but check if the final frame was just added
+    if (!isLastFrameExtracted) {
+        try {
+            const fileName = `output_${nFrames.toString().padStart(4, '0')}.png`;
             const data = await ffmpeg.readFile(fileName);
             // @ts-expect-error
-            let buffer = data.buffer;
-            let uint8barrayitem = new Uint8Array(buffer);
-            
-            // standardize the image to RGBA format for comparison
-            let rgbaImage = await imageToRGBA(uint8barrayitem);
-            let currentUint8 = rgbaImage.arrayInstance;
-
-            if (uint8Store === null) {
-                uint8Store = currentUint8;
-            } else {
-                if (uint8Store.length === currentUint8.length && rmsDiff(uint8Store, currentUint8) < 5) {
-                    console.log(`Skipping frame ${i} as it is identical to the previous frame.`);
-                    continue; // Skip identical frames
-                }
-                uint8Store = currentUint8;
-            }
+            const buffer = data.buffer;
+            const uint8barrayitem = new Uint8Array(buffer);
 
             extractedFrames.push({
                 blob: new Blob([uint8barrayitem], { type: 'image/png' }),
-                timestamp: (i - 1) * interval,
-                index: i
+                timestamp: (nFrames - 1) * interval,
+                index: nFrames
             });
         } catch (e) {
-            console.log(`Error reading file output_${i.toString().padStart(4, '0')}.png: ${e}`);
-            break; 
+            console.log(`Error reading file output_${nFrames.toString().padStart(4, '0')}.png: ${e}`);
         }
+
     }
 
     return extractedFrames;
@@ -111,7 +149,7 @@ export const extractFrames = async (
 // but refactored to use extractFrames
 export const convertToPdf = async (inputFile: string, ffmpeg: FFmpeg, logCallback: (message: { message: string }) => void, progressCallback: (progress: number) => void) => {
     const frames = await extractFrames(inputFile, ffmpeg, logCallback, progressCallback);
-    
+
     // Convert blobs to HTMLImageElement
     const images: HTMLImageElement[] = await Promise.all(frames.map(frame => {
         return new Promise<HTMLImageElement>((resolve) => {
